@@ -73,10 +73,13 @@ class AuthController {
                   isEmailVerified: false,
                   deleted: false,
                 });
-        
                 await doc.save();
-        
-                let savedSeller = await sellerModel.findOne({ email: email })
+                let savedSeller = await sellerModel.findOne({ email: email }).select("-users").select("-password");
+                await sellerModel.findByIdAndUpdate(savedSeller._id,{
+                    $set:{
+                        users:[savedSeller]
+                    }
+                })
         
                 //Generating Token Here
                 const token = jwt.sign(
@@ -358,10 +361,21 @@ class AuthController {
                 message: "Please Provide Valid Token",
                 stack: "Error: Token not Found",
             })
-        }
-        
+        }  
     }
-    
+  };
+
+  static selfCall = async(req,res)=>{
+    try{
+        return res.send(req.seller)
+    }catch(err){
+        return res.send({
+            code: 400,
+            message: "Please Provide Valid Token",
+            stack: "Error: Token not Found",
+        })
+    }
+   
   }
 
 }

@@ -1,9 +1,12 @@
 import mongoose from 'mongoose'
-
 var newId = new mongoose.Types.ObjectId();
 
-const sellerSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema(
     {
+        _id: {
+            type: String,
+            required: true,
+          },
         name: {
           type: String,
           required: true,
@@ -53,14 +56,9 @@ const sellerSchema = new mongoose.Schema(
           default: Date.now,
           required: true,
         },
-        users:{
-            type:Array,
-            default:[],
-            required:false
-        }
       }
 )
 
-const sellerModel = mongoose.model("seller",sellerSchema);
+const userModel = mongoose.model("user",userSchema);
 
-export default sellerModel;
+export default userModel;
