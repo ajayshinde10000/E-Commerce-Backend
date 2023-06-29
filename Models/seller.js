@@ -1,5 +1,4 @@
 import mongoose from 'mongoose'
-
 var newId = new mongoose.Types.ObjectId();
 
 const sellerSchema = new mongoose.Schema(
@@ -53,11 +52,6 @@ const sellerSchema = new mongoose.Schema(
           default: Date.now,
           required: true,
         },
-        users:{
-            type:Array,
-            default:[],
-            required:false
-        }
       }
 )
 

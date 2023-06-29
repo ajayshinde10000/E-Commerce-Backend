@@ -3,10 +3,6 @@ var newId = new mongoose.Types.ObjectId();
 
 const userSchema = new mongoose.Schema(
     {
-        _id: {
-            type: String,
-            required: true,
-          },
         name: {
           type: String,
           required: true,
@@ -14,7 +10,6 @@ const userSchema = new mongoose.Schema(
         _org: {
           _id: {
             type: mongoose.Schema.Types.ObjectId,
-            default: newId,
             required: true,
           },
           name: {
