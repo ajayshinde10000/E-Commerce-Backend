@@ -6,6 +6,7 @@ import cors from 'cors';
 import authRoutes from './Routes/authRoutes.js'
 import userRoutes from './Routes/userRoutes.js'
 import productRoutes from './Routes/productsRoutes.js'
+import shopUserRoutes from './Routes/shopRoutes.js';
 
 import connectDb from './Config/connectDB.js';
 
@@ -24,7 +25,9 @@ app.use('/auth',authRoutes);
 
 app.use('/users',userRoutes);
 
-app.use('/products',productRoutes)
+app.use('/products',productRoutes);
+
+app.use('/shop',shopUserRoutes);
 
 app.listen(3000,()=>{
     console.log("App Listening on 3000 port")
