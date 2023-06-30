@@ -31,7 +31,7 @@ const shopUserSchema = new mongoose.Schema(
         },
         picture: {
             type: String,
-            default: 'user.png' // Default image path or filename
+            default: 'Profile-Picture-Images/28ad22b01fb87e34f1fdf4014e2a0e3c' // Default image path or filename
         },
         addresses:[]
       }
