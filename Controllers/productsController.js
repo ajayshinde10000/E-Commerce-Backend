@@ -166,7 +166,8 @@ class ProductsController{
               description,
               price,
               _org,
-              images: req.files.map(file => file.filename)
+              images: req.files.map(file => file.filename),
+              sellerId:req.seller._id
             });
             const savedProduct = await product.save();
            //return res.status(201).json(savedProduct);

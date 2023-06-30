@@ -7,6 +7,8 @@ import authRoutes from './Routes/authRoutes.js'
 import userRoutes from './Routes/userRoutes.js'
 import productRoutes from './Routes/productsRoutes.js'
 import shopUserRoutes from './Routes/shopRoutes.js';
+import shoopUserOrderRoutes from './Routes/shopUserOrderRoutes.js'
+import sellerOrderRoutes from './Routes/sellerOrderRoutes.js'
 
 import connectDb from './Config/connectDB.js';
 
@@ -28,6 +30,10 @@ app.use('/users',userRoutes);
 app.use('/products',productRoutes);
 
 app.use('/shop',shopUserRoutes);
+
+app.use('/shop/orders',shoopUserOrderRoutes);
+
+app.use('/orders',sellerOrderRoutes)
 
 app.listen(3000,()=>{
     console.log("App Listening on 3000 port")
