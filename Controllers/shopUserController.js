@@ -11,9 +11,132 @@ class ShopUserController{
 
 
     static getProducts = async(req,res)=>{
-        let products = await productModel.find();
-        return res.send(products);
-    }
+
+        try {
+            let params = req.query;
+            const { limit, page, sortBy, name } = req.query;
+      
+            let countTotalResult = await productModel.find();
+      
+            let resResult = countTotalResult.length;
+            //console.log(countTotalResult,"Working");
+            let u = await this.getUsersByQuery(req.query);
+            console.log(resResult,"From U")
+      
+            if(u.length==undefined){
+              console.log(u.length)
+              throw Error("Invalid Page Number");
+            }
+      
+            let countLimit = 10;
+            let countPage = 1;
+      
+            if (limit) {
+              countLimit = limit;
+            }
+      
+            if (page) {
+              countPage = page;
+            }
+
+            if(name){
+                try{
+                    let product = await productModel.find({name:name});
+                    return res.send({
+                        results: product,
+                        page: 1,
+                        limit: 10,
+                        totalPages: 1,
+                        totalResults: 1,
+                      })
+                }
+                catch(err){
+                    return res.send({
+                        results: [],
+                        page: 1,
+                        limit: 10,
+                        totalPages: 1,
+                        totalResults: 1,
+                      })
+                }
+                
+            }
+      
+            let totalPages = Math.ceil(resResult/ countLimit);
+            if (totalPages == 0) {
+              totalPages = 1;
+            }
+      
+            let countrole = 0;
+      
+            let obj = {
+              results: u,
+              page: countPage,
+              limit: countLimit,
+              totalPages: totalPages,
+              totalResults: resResult,
+            };
+            // console.log(users);
+            res.send(obj);
+          } catch (err) {
+            console.log(err)
+              return res.send({
+                  results: [],
+                  page: 0,
+                  limit: 0,
+                  totalPages: 0,
+                  totalResults: 0,
+                })
+          }
+        };
+      
+        static getUsersByQuery = async (filterParams, id) => {
+          try {
+            let query = productModel.find();
+            if (filterParams.name) {
+              query = query.where("name").equals(filterParams.name);
+            }
+      
+            if (filterParams.sortBy) {
+              query = query.sort(filterParams.sortBy);
+            }
+      
+            let limit = 10; // Default limit to 10 if not provided
+            if (filterParams.limit) {
+              limit = parseInt(filterParams.limit);
+            }
+            query = query.limit(limit);
+      
+            let page = 1; // Default page to 1 if not provided
+            if (filterParams.page) {
+              page = parseInt(filterParams.page);
+            }
+      
+            const countQuery = productModel.find().countDocuments();
+            let totalUsers = await countQuery.exec();
+            //console.log(totalUsers,"From TotalUsers")
+      
+          
+            // Calculate the total number of pages based on the filtered results
+            const totalPages = Math.ceil(totalUsers / limit);
+            //console.log(totalPages,"From totalPages");
+      
+            if (page > totalPages) {
+             return new Error("Invalid Page Number");
+              //console.log("Invalid page number. No data available.");
+            }
+            const skip = (page - 1) * limit;
+            query = query.skip(skip);
+      
+            const products = await query.exec();
+            console.log(products,"From Products")
+            return products;
+          } catch (error) {
+            console.error("Error getting Products:", error);
+          }
+        };
+      
+
 
     static updateCustomerProfile = async(req,res)=>{
         const {name,email} = req.body;
