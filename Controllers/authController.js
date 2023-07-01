@@ -2,6 +2,8 @@ import sellerModel from "../Models/seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import e from "express";
+import emailVerificationModel from "../Models/emailVerification.js";
+import resetPasswordModel from "../Models/resetPassword.js";
 
 import nodemailer from "nodemailer";
 
@@ -214,32 +216,54 @@ class AuthController {
     else{
         let seller = await sellerModel.findOne({email:email});
         if(seller){
+       
+          try{
             const token = await jwt.sign(
-                { sub: seller._id,type: 'resetPassword' },
-                  process.env.JWT_SECRET_KEY,
-                { expiresIn: "15m" }
-            );
-            let link = `http://localhost:4200/auth/reset-password?token=${token}`;
-            const mailOptions = {
-                from: "ajayshinde10000@gmail.com",
-                to: seller.email,
-                subject: "Reset Password",
-                text:`Dear user,
-                      To reset your password, click on this link: ${link}
-                      If you did not request any password resets, then ignore this email.` ,
-              };
-              transporter.sendMail(mailOptions)
-      .then((info) => {
-        console.log('Email sent: ' + info.response);
-        return res.send(`Email Sent On Registered Mail Please Check: ${token}`);
-      })
-      .catch((error) => {
-        return res.send({
-            code: 400,
-            message: "Unable To Send Email Please Provide Valid Email",
-            stack: "Error: Unable to generate link. Sorry for the inconvennience",
-        })
-      });
+              { sub: seller._id,type: 'resetPassword' },
+                process.env.JWT_SECRET_KEY,
+              { expiresIn: "15m" }
+          );
+          let link = `http://localhost:4200/auth/reset-password?token=${token}`;
+          const mailOptions = {
+              from: "ajayshinde10000@gmail.com",
+              to: seller.email,
+              subject: "Reset Password",
+              text:`Dear user,
+                    To reset your password, click on this link: ${link}
+                    If you did not request any password resets, then ignore this email.` ,
+            };
+    //   transporter.sendMail(mailOptions)
+    // .then((info) => {
+    //   console.log('Email sent: ' + info.response);
+    //   return res.send(`Email Sent On Registered Mail Please Check: ${token}`);
+    // })
+    // .catch((error) => {
+    //   return res.send({
+    //       code: 400,
+    //       message: "Unable To Send Email Please Provide Valid Email",
+    //       stack: "Error: Unable to generate link. Sorry for the inconvennience",
+    //   })
+    // });
+
+
+    let doc = new resetPasswordModel({
+      email:email,
+      description:`Dear user,
+                   To reset your password, click on this link: ${link}
+                   If you did not request any password resets, then ignore this email.`
+    }) 
+
+    await doc.save();
+    return res.send(mailOptions);
+
+          }catch(err){
+            return res.send({
+              code: 400,
+              message: "Error Occurrred",
+              stack: "Error: Unable to send email",
+          })
+          }
+
 
         }
         else{
@@ -290,8 +314,7 @@ class AuthController {
                 message: "Provided Token Is not a valid token",
                 stack: "Error: Please Resend Email For Verification",
             })
-        }
-        
+        }  
     }
   };
 
@@ -313,22 +336,33 @@ class AuthController {
                   To verify your email, click on this link: ${link}
                   If you did not create an account, then ignore this email` ,
           };
-          transporter.sendMail(mailOptions)
-  .then((info) => {
-    console.log('Email sent: ' + info.response);
-    return res.send(`Email Sent On Registered Mail Please Check: ${token}`);
-  })
-  .catch((error) => {
-    console.log("Email Error")
-    return res.send({
-        code: 400,
-        message: "Unable To Send Email Please Provide Valid Email",
-        stack: "Error: Unable to generate link. Sorry for the inconvennience",
-    })
-  });
+  //   transporter.sendMail(mailOptions)
+  // .then((info) => {
+  //   console.log('Email sent: ' + info.response);
+  //   return res.send(`Email Sent On Registered Mail Please Check: ${token}`);
+  // })
+  // .catch((error) => {
+  //   console.log("Email Error")
+  //   return res.send({
+  //       code: 400,
+  //       message: "Unable To Send Email Please Provide Valid Email",
+  //       stack: "Error: Unable to generate link. Sorry for the inconvennience",
+  //   })
+  // });
+
+
+  let doc = new emailVerificationModel({
+    email:req.seller.email,
+    description:`Dear user,
+                 To reset your password, click on this link: ${link}
+                 If you did not request any password resets, then ignore this email.`
+  }) 
+
+  await doc.save();
+  return res.send(mailOptions);
 
     }catch(err){
-        console.log("Main Error")
+        console.log(err)
         return res.send({
             code: 400,
             message: "Unable To Send Email Please Provide Valid Email",
