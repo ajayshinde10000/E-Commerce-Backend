@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import e from "express";
 import emailVerificationModel from "../Models/emailVerification.js";
 import resetPasswordModel from "../Models/resetPassword.js";
+import emailModel from '../Models/Emails.js';
 
 import nodemailer from "nodemailer";
 
@@ -245,6 +246,16 @@ class AuthController {
     //   })
     // });
 
+    let saveEmail = new emailModel({
+      email:email,
+      description:`Dear user,
+      To reset your password, click on this link: ${link}
+      If you did not request any password resets, then ignore this email.`,
+      link:link,
+      type:'reset'
+    })
+
+
 
     let doc = new resetPasswordModel({
       email:email,
@@ -254,7 +265,8 @@ class AuthController {
     }) 
 
     await doc.save();
-    return res.send(mailOptions);
+    await saveEmail.save();
+    return res.send(saveEmail);
 
           }catch(err){
             return res.send({
@@ -328,13 +340,24 @@ class AuthController {
         );
    
         let link = `http://localhost:4200/auth/reset-password?token=${token}`;
+
+        let saveEmail = new emailModel({
+          email:req.seller.email,
+          description:`Dear user,
+          To Verify your Email, click on this link: ${link}
+          If you did not request any Email Verification, then ignore this email.`,
+          link:link,
+          type:'verify'
+        })
+        
+
         const mailOptions = {
             from: "ajayshinde10000@gmail.com",
             to: req.seller.email,
             subject: "Email Verification",
             text:`Dear user,
-                  To verify your email, click on this link: ${link}
-                  If you did not create an account, then ignore this email` ,
+            To Verify your email, click on this link: ${link}
+            If you did not request any password resets, then ignore this email.` ,
           };
   //   transporter.sendMail(mailOptions)
   // .then((info) => {
@@ -359,7 +382,10 @@ class AuthController {
   }) 
 
   await doc.save();
-  return res.send(mailOptions);
+
+  await saveEmail.save();
+
+  return res.send(saveEmail);
 
     }catch(err){
         console.log(err)
