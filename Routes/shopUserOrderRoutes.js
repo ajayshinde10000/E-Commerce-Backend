@@ -11,8 +11,10 @@ router.use('/cancel/:orderId',checkShopAuth);
 
 router.get('/',userOrderController.getOrders);
 router.post('/create-order',userOrderController.createOrder);
-router.post('/confirm/:orderId',userOrderController.confirmOrder);
+router.put('/confirm/:orderId',userOrderController.confirmOrder);
+
 router.get('/:orderId',userOrderController.orderDetails);
+
 router.patch('/cancel/:orderId',userOrderController.cancelOrder);
 
 export default router;

@@ -3,6 +3,7 @@ import resetPasswordModel from "../Models/resetPassword.js";
 import emailVerificationModel from "../Models/emailVerification.js";
 
 import path from "path";
+import emailsModel from "../Models/Emails.js";
 const __dirname = path.resolve();
 
 class EmailController {
@@ -81,8 +82,240 @@ class EmailController {
       const { email } = req.params;
       console.log(email, "From Params");
 
-      let arr = [];
-      let verifyEmail = await emailVerificationModel.find({ email: email });
+      let savedEmails = await emailsModel.find({email:email});
+      let myStr = "";
+
+      if(savedEmails.length == 0){
+        return res.redirect(`/emails`);
+      }
+
+      for(let e of savedEmails){
+
+        let attchType = "Email Verification";
+        if(e.type=="reset"){
+          attchType = "Reset Password"
+        }
+
+        myStr+= ` 
+        <a href="/emails/view/${e._id}">
+          <div class="card mt-3">
+                <div class="card-body" style="background-color: #eeeeee;">
+                    <p class="fw-bold my-0">${attchType}</p>
+                    <p class="mb-0">${e.createdAt}</p>
+                </div>
+          </div>
+        </a>
+`
+      }
+
+      let myHtml = `
+      <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+
+    <title>Emails</title>
+
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            font-family: monospace;
+        }
+    </style>
+
+  </head>
+  <body>
+    <div class="container">
+      <div class="row">
+        <div class="col-2"></div>
+
+        <div class="col-8 mt-5">
+          <div class="card">
+            <div class="card-body d-flex justify-content-between bg-dark text-white rounded"> <span class="fw-bold fs-5">Local Mailbox </span>  <span> ${email} - Logout</span> </div>
+          </div>
+
+          ${myStr}
+        </div>
+
+        <div class="col-2"></div>
+      </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+`
+
+      return res.send(myHtml);
+
+    } catch (err) {
+      return res.send("Error Occurred");
+    }
+  };
+
+  static getVerifyEmailDetails = async (req, res) => {
+    try {
+      const { emailId } = req.params;
+      let email = await emailVerificationModel.findById(emailId);
+
+      let str = `
+        <div class="card">
+  <h5 class="card-header">
+    From: no-reply@ajayshinde.com <br>
+    To: ${email.email} <br>
+    Subject: Email Verification
+  </h5>
+
+  <div class="card-body">
+    <p>
+        ${email.description}
+    </p>
+  </div>
+</div>
+`;
+
+      let html = `<!doctype html>
+        <html lang="en">
+          <head>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <title>Bootstrap demo</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+          </head>
+          <body>
+            <div class="container mx-auto mt-5 pt-5">
+                <div class="w-50">
+                    ${str}
+                </div>
+            </div>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+          </body>
+        </html>`;
+
+      res.send(html);
+    } catch (err) {
+      return res.send("Error Occured");
+    }
+  };
+
+  static getemailDetails = async (req, res) => {
+    try {
+      const { emailId } = req.params;
+
+      let type = "Verify Email";
+
+      console.log(emailId);
+
+      let emailDetails = await emailsModel.findById(emailId);
+
+      if (emailDetails.type == "reset") {
+        type = "Reset Password";
+      }
+
+      let html = `
+      <!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+      crossorigin="anonymous"
+    />
+    <title>Email Details</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        body{
+            font-family: monospace;
+        }
+    </style>
+
+  </head>
+  <body>
+    <div class="container mx-auto mt-5 pt-5">
+        <div class="row">
+            <div class="col-3"></div>
+
+            <div class="col-6 shadow-lg mb-5 bg-body rounded border p-4">
+
+                <div style="background-color: #bbbbbb;" class="p-2">
+                    <p>
+                
+                    <strong>From:</strong> ajayshinde@gmail.com
+                    <br><strong>To:</strong> ${emailDetails.email} <br>
+                    <strong>Subject:</strong> ${type}
+
+                    </p>
+
+                </div>
+                <div class="mt-4 lh-lg">
+                    <p class="text-break">
+                         Dear user, <br>
+                         To reset your password, click on this link: <br>
+                        <a href="${emailDetails.link}">${emailDetails.link}</a>
+                        <br> If you did not request any ${type}, then ignore this email.
+                    </p>
+                </div>
+            </div>
+
+            <div class="col-3"></div>
+        </div>
+    </div>
+
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+      crossorigin="anonymous"
+    ></script>
+  </body>
+</html>
+
+`;
+
+      return res.send(html);
+    } catch (err) {
+      return res.send({ message: "Error Occurred" });
+    }
+  };
+
+  static getResetEmailDetails = async (req, res) => {
+    try {
+      try {
+        const { emailId } = req.params;
+        let email = await resetPasswordModel.findById(emailId);
+        res.send(email);
+      } catch (err) {
+        return res.send("Error Occured");
+      }
+    } catch (err) {}
+  };
+
+}
+
+export default EmailController;
+
+// Previous Logic
+/*
+let verifyEmail = await emailVerificationModel.find({ email: email });
       let resetPasswordEmail = await resetPasswordModel.find({ email: email });
 
       let str = ``;
@@ -147,68 +380,5 @@ class EmailController {
       `;
 
       console.log(str);
-      return res.send(html);
-    } catch (err) {
-      return res.send("Error Occurred");
-    }
-  };
-
-  static getVerifyEmailDetails = async (req, res) => {
-    try {
-      const { emailId } = req.params;
-      let email = await emailVerificationModel.findById(emailId);
-
-      let str = `
-        <div class="card">
-  <h5 class="card-header">
-    From: no-reply@ajayshinde.com <br>
-    To: ${email.email} <br>
-    Subject: Email Verification
-  </h5>
-
-  <div class="card-body">
-    <p>
-        ${email.description}
-    </p>
-  </div>
-</div>
-`;
-
-      let html = `<!doctype html>
-        <html lang="en">
-          <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1">
-            <title>Bootstrap demo</title>
-            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
-          </head>
-          <body>
-            <div class="container mx-auto mt-5 pt-5">
-                <div class="w-50">
-                    ${str}
-                </div>
-            </div>
-            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
-          </body>
-        </html>`;
-
-      res.send(html);
-    } catch (err) {
-      return res.send("Error Occured");
-    }
-  };
-
-  static getResetEmailDetails = async (req, res) => {
-    try {
-      try {
-        const { emailId } = req.params;
-        let email = await resetPasswordModel.findById(emailId);
-        res.send(email);
-      } catch (err) {
-        return res.send("Error Occured");
-      }
-    } catch (err) {}
-  };
-}
-
-export default EmailController;
+      
+*/

@@ -8,7 +8,6 @@ router.use('/',checkAuth);
 router.use('/org',checkAuth);
 router.use('/:userId',checkAuth);
 router.use('/role/:userId',checkAuth);
-router.use('/:userId',checkAuth);
 
 //public Routes
 

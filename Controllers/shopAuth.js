@@ -132,7 +132,7 @@ class ShopAuthController {
                    return res.send(obj);
                 }
                 else{
-                  return res.send({
+                  return res.status(400).send({
                         code: 400,
                         message: "Email Or Password Wrong Please Check",
                         stack: "Error: Email Or Password Wrong",
@@ -141,7 +141,7 @@ class ShopAuthController {
 
             }
             else{
-                return res.send({
+                return res.status(400).send({
                     code: 400,
                     message: "User Not Found Please Register First",
                     stack: "Error: Please create Account",
@@ -149,7 +149,7 @@ class ShopAuthController {
             }
         }
 
-        res.send("Login Works")
+        //res.send("Login Works")
     }
     else{
        return res.send({
@@ -354,7 +354,7 @@ class ShopAuthController {
         console.log(req.shopUser);
         return res.send(req.shopUser)
     }catch(err){
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: "Please Provide Valid Token",
             stack: "Error: Token not Found",

@@ -171,7 +171,7 @@ class ProductsController{
             });
             const savedProduct = await product.save();
            //return res.status(201).json(savedProduct);
-           return res.send("Product Added Successfully")
+           return res.send({message:"Product Added Successfully"})
           } catch (error) {
             return res.send({
                 code: 400,
@@ -215,7 +215,7 @@ class ProductsController{
                     }
                 });
                 console.log(product,"From Product");
-                res.send("Product Updated Successfully");
+                return res.send({message:"Product Updated Successfully"});
             }
             catch(err){
                 return res.send({
@@ -233,7 +233,7 @@ class ProductsController{
             let productId = req.params.productId;
             let product = await productsModel.findById(productId);
             await productsModel.findByIdAndDelete(productId);
-            res.send("Product Deleted Successfully")
+            return res.send({message:"Product Deleted Successfully"})
         }
         catch(err){
             return res.send({
@@ -246,6 +246,9 @@ class ProductsController{
 
 
     static getProductImage = async (req, res) => {
+
+        console.log("APi Gets Hit")
+
         const { filename } = req.params;
         try {
           // Find the product that contains the requested image
@@ -267,11 +270,11 @@ class ProductsController{
     
             // Set the appropriate response headers
             res.setHeader('Content-Type', 'image/png'); // Adjust the content type based on your image format
-            res.send(data);
+           return res.send(data);
           });
         } catch (error) {
           console.error(error);
-          res.status(500).json({ error: 'Failed to retrieve image' });
+          return res.status(500).json({ error: 'Failed to retrieve image' });
         }
       };
 
@@ -321,7 +324,6 @@ class ProductsController{
           }
     
           const updatedProduct = await product.save();
-    
           res.json({ product: updatedProduct });
         } catch (error) {
           console.error(error);

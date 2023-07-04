@@ -11,7 +11,9 @@ const upload = multer({ dest: 'Profile-Picture-Images/'});
 router.use('/auth/self',checkShopAuth);
 router.use('/customers/update-profile',checkShopAuth);
 router.use('/customers/profile-picture',checkShopAuth);
-router.use('/profile-picture/:userId',checkShopAuth);
+
+//router.use('/profile-picture/:userId',checkShopAuth);
+
 router.use('/customers/profile-picture',checkShopAuth);
 router.use('/customers/address',checkShopAuth);
 router.use('/customers/address',checkShopAuth);
@@ -22,6 +24,7 @@ router.use('/customers/account',checkShopAuth);
 
 //public Apis
 router.get('/products',shopUserController.getProducts);
+router.get('/product/:productId',shopUserController.getProductDetails);
 router.get('/',shopUserController.getUser);
 router.post('/auth/register',ShopAuthController.register);
 router.post('/auth/login',ShopAuthController.login);

@@ -6,6 +6,7 @@ class UserController {
   static getUsers = async (req, res) => {
     try {
       let params = req.query;
+      console.log(params);
       const { limit, page, sortBy, role } = req.query;
 
       let countTotalResult = await sellerModel.find({
@@ -156,7 +157,7 @@ class UserController {
                 "_org.name":name,
                 "_org.email":email,
             });
-            return res.send("Company Information Updated Successfully");
+            return res.send({message:"Company Information Updated Successfully"});
         }catch(err){
             res.send({
                 code: 400,
@@ -260,7 +261,7 @@ class UserController {
           return res.send(obj);
         } catch (err) {
           console.log("Error", err);
-          return res.send("Error Occurrred");
+          return res.send({message:"Error Occurrred"});
         }
       }
     }
@@ -268,8 +269,9 @@ class UserController {
   };
 
   static updateUserInfo = async(req,res)=>{
-    console.log(req.params.userId);
+  
     let userId = req.params.userId;
+    console.log(userId);
 
     const {email,password,name} = req.body;
     if(userId==null || userId==undefined || userId==""){
@@ -303,9 +305,10 @@ class UserController {
     else{
         try{
             const salt = await bcrypt.genSalt(10);
-        const hashPassword = await bcrypt.hash(password, salt);
+            const hashPassword = await bcrypt.hash(password, salt);
 
-        let user = await sellerModel.findById(userId);
+        let user = await sellerModel.findById(userId).select('-password');
+    
         if(user==null || user==undefined){
             res.send({
                 code: 400,
@@ -314,16 +317,20 @@ class UserController {
             })
         }
 
-        await sellerModel.findByIdAndUpdate(user._id,{
+        await sellerModel.findByIdAndUpdate(userId,{
             $set:{
                 name:name,
                 email:email,
                 password:hashPassword
             }
         });
-        return res.send("User Updated Successfully");
+
+        let updatedUser = await sellerModel.findById(userId).select("-password");
+        console.log(updatedUser,"From Node")
+        return res.send(updatedUser);
 
         }catch(err){
+          console.log(err);
             res.send({
                 code: 400,
                 message: 'Please Provide Valid UserId',
@@ -336,7 +343,6 @@ class UserController {
   static updateUserRole = async(req,res)=>{
     console.log(req.params.userId);
     let userId = req.params.userId;
-
     const {role} = req.body;
 
     if(userId==null || userId==undefined || userId==""){
@@ -362,7 +368,7 @@ class UserController {
                role:role
             }
         });
-        return res.send("User role Updated Successfully");
+        return res.send({message:"User role Updated Successfully"});
 
         }catch(err){
             return res.send({
@@ -396,9 +402,9 @@ class UserController {
             })
         }
         await sellerModel.findByIdAndDelete(userId);
-        return res.send("User Deleted Successfully");
+        return res.send({message:"User Deleted Successfully"});
         }catch(err){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: 'Please Provide Valid UserId',
                 stack: "Error: User does not Exist With This Id",
@@ -406,7 +412,7 @@ class UserController {
         }
     }
     else{
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: 'Not a valid UserId',
             stack: 'Please Provide valid UserId',

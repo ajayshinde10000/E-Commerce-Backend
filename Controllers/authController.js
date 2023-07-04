@@ -120,9 +120,9 @@ class AuthController {
     const {email,password} = req.body;
     let captchaStatus = req.query.captcha;
     console.log(captchaStatus == "false");
-    if(captchaStatus=="false"){
-
-        if(email!="" && password!=""){
+    if(captchaStatus=="false" || !captchaStatus){
+        try{
+          if(email!="" && password!=""){
             let seller = await sellerModel.findOne({email:email});
             if(seller){
                 const isMatch = await bcrypt.compare(password, seller.password);
@@ -152,16 +152,12 @@ class AuthController {
                    return res.send(obj);
                 }
                 else{
-                  return res.send({
-                        code: 400,
-                        message: "Email Or Password Wrong Please Check",
-                        stack: "Error: Email Or Password Wrong",
-                    }) 
+                  return res.status(400).send({message:'Email Or Password Wrong'}) 
                 }
 
             }
             else{
-                return res.send({
+                return res.status(400).send({
                     code: 400,
                     message: "User Not Found Please Register First",
                     stack: "Error: Please create Account",
@@ -169,10 +165,17 @@ class AuthController {
             }
         }
 
-        res.send("Login Works")
+        }
+        catch(err){
+          return res.status(400).send({
+            code: 400,
+            message: "Please Register first",
+            stack: "Error: Please Enter Valid Details",
+        })
+        }
     }
     else{
-       return res.send({
+       return res.status(400).send({
             code: 400,
             message: "Re-Captcha Verification Failed",
             stack: "Error: Please Provide Valid Captcha",
@@ -182,25 +185,31 @@ class AuthController {
 
   static changePassword = async(req,res)=>{
     const {old_password,new_password} = req.body;
+    console.log(req.body,"From Change Password")
     if(old_password=="" || old_password==undefined || old_password==null){
-        return res.send("Please Provide Old Password");
+        return res.status(400).send({message:"Please Provide Old Password"});
     }
     else if(new_password=="" || new_password==undefined || new_password==null){
-        return res.send("Please Enter New Password");
+        return res.status(400).send({message:"Please Enter New Password"});
+    }
+    else if(new_password != old_password){
+      return res.status(400).send({message:"Old Password And New Password Does not Match"});
     }
     else{
         try{
             let salt = await bcrypt.genSalt(10);
             let newHashPassword = await bcrypt.hash(new_password,salt);
+            console.log(req.seller);
 
             await sellerModel.findByIdAndUpdate(req.seller._id,{
                 $set:{
                     password:newHashPassword
                 }
             })
-            return res.send("Password Changed Successfully");
+            return res.send({message:"Password Changed Successfully"});
         }catch(err){
-            return res.send({
+          console.log(err)
+            return res.status(400).send({
                 code: 400,
                 message: "Unable To Change Password",
                 stack: "Error: Something went wrong On Server",
@@ -217,7 +226,6 @@ class AuthController {
     else{
         let seller = await sellerModel.findOne({email:email});
         if(seller){
-       
           try{
             const token = await jwt.sign(
               { sub: seller._id,type: 'resetPassword' },
@@ -279,7 +287,7 @@ class AuthController {
 
         }
         else{
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "User Does Not Found with this Email Please check",
                 stack: "Error: User Not Found",
@@ -289,17 +297,18 @@ class AuthController {
   };
 
   static resetPassword = async(req,res)=>{
-    console.log("Reset Password works");
-    const {token, password} = req.body;
+    console.log(req.query,"Reset Password works");
+    const { password} = req.body;
+    const {token} = req.query;
     if(token=="" || token == undefined || token == null){
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: "Token Not Found",
             stack: "Error: Token Not Found",
         })
     }
     else if(password=="" || password==undefined || password==null){
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: "Password Is Required",
             stack: "Error: Password is not to be empty",
@@ -318,10 +327,12 @@ class AuthController {
                     password:newHashPassword
                 }
             })
-            return res.send("Password reset Successfull");
+            console.log("Sending Response Successfully")
+            return res.status(201).send({message:"Password reset Successfull"});
 
         }catch(err){
-            return res.send({
+          console.log("Error Occured",err)
+            return res.status(400).send({
                 code: 400,
                 message: "Provided Token Is not a valid token",
                 stack: "Error: Please Resend Email For Verification",
@@ -339,7 +350,7 @@ class AuthController {
             { expiresIn: "15m" }
         );
    
-        let link = `http://localhost:4200/auth/reset-password?token=${token}`;
+        let link = `http://localhost:4200/auth/verify-email?token=${token}`;
 
         let saveEmail = new emailModel({
           email:req.seller.email,
@@ -374,18 +385,18 @@ class AuthController {
   // });
 
 
-  let doc = new emailVerificationModel({
-    email:req.seller.email,
-    description:`Dear user,
-                 To reset your password, click on this link: ${link}
-                 If you did not request any password resets, then ignore this email.`
-  }) 
+  // let doc = new emailVerificationModel({
+  //   email:req.seller.email,
+  //   description:`Dear user,
+  //                To reset your password, click on this link: ${link}
+  //                If you did not request any password resets, then ignore this email.`
+  // }) 
 
-  await doc.save();
+  // await doc.save();
 
   await saveEmail.save();
 
-  return res.send(saveEmail);
+  return res.send({message:"Email Verification Link Will Be Sent On Your Email Please Check"});
 
     }catch(err){
         console.log(err)
@@ -400,7 +411,7 @@ class AuthController {
   static verifyEmail = async(req,res)=>{
     let token = req.query.token;
     if(token=="" || token == undefined || token ==null){
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: "Please Provide Valid Token",
             stack: "Error: Token not Found",
@@ -415,7 +426,7 @@ class AuthController {
                 }
             })
             console.log(seller);
-            res.send("Email verified Successfully")
+            res.send({message:"Email verified Successfully"})
         }catch(err){
             return res.send({
                 code: 400,

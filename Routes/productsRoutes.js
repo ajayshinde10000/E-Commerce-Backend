@@ -1,6 +1,6 @@
 import express from 'express';
-import productsController from '../Controllers/productsController.js';
 import checkAuth from '../Middeleware/authMiddeleware.js';
+import productsController from '../Controllers/productsController.js';
 import multer from 'multer';
 
 
@@ -30,7 +30,8 @@ router.use('/:productId',checkAuth);
 //Private Routes
 router.get('/',productsController.getProducts);
 
-router.get('/images/:filename', productsController.getProductImage);
+router.get('/images/:filename',productsController.getProductImage);
+
 router.get('/:productId',productsController.getOneProduct);
 router.post('/',upload.array('images'),productsController.createProduct);
 router.patch('/images/:productId',upload.array('images'),productsController.updateProductImages);

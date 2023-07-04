@@ -179,14 +179,16 @@ class ShopUserController{
 
     static updateCustomerProfilePicture = async (req,res)=>{
         try{
+            console.log("Api Gets Hit")
+            res.set('Content-Type', 'image/jpeg');
             const profilePicture = req.file;
-            console.log(req.shopUser)
+            console.log(req.file)
             let user = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                 $set:{
                     picture:profilePicture.path
                 }
             });
-            res.send("Profile Picture Updated Successfully");
+            return res.send({message:"Profile Picture Updated Successfully"});
         }catch(err){
             console.log(err);
             return res.send({
@@ -248,7 +250,11 @@ class ShopUserController{
       };
 
       static getSavedAddresses = async(req,res)=>{
-            return res.send(req.shopUser.addresses);
+            try{
+                return res.send(req.shopUser.addresses);
+            }catch(err){
+                return res.status(400).send({message:"Error Occurred"})
+            }
       }
 
 
@@ -256,35 +262,35 @@ class ShopUserController{
 
         let { street, addressLine2 ,city ,state ,pin} = req.body;
         if(street=="" || street==undefined || street==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Street is required",
                 stack: "Error: Please Provide Street value",
             })
         }
         else if(addressLine2=="" || addressLine2==undefined || addressLine2==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Address Line2 is required",
                 stack: "Error: Please Provide Address Line2 value",
             })
         }
         else if(city=="" || city==undefined || city==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "City is required",
                 stack: "Error: Please Provide City value",
             })
         }
         else if(state=="" || state==undefined || state==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "State is required",
                 stack: "Error: Please Provide State value",
             })
         }
         else if(pin=="" || pin==undefined || pin==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Pin is required",
                 stack: "Error: Please Provide Valid pin",
@@ -315,7 +321,7 @@ class ShopUserController{
                 
             }catch(err){
                 console.log(err)
-                return res.send({
+                return res.status(400).send({
                     code: 400,
                     message: "Unable To Add Address",
                     stack: "Error: Plaese check Token",
@@ -328,35 +334,35 @@ class ShopUserController{
       static updateAddress = async(req,res)=>{
         let { street, addressLine2 ,city ,state ,pin} = req.body;
         if(street=="" || street==undefined || street==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Street is required",
                 stack: "Error: Please Provide Street value",
             })
         }
         else if(addressLine2=="" || addressLine2==undefined || addressLine2==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Address Line2 is required",
                 stack: "Error: Please Provide Address Line2 value",
             })
         }
         else if(city=="" || city==undefined || city==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "City is required",
                 stack: "Error: Please Provide City value",
             })
         }
         else if(state=="" || state==undefined || state==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "State is required",
                 stack: "Error: Please Provide State value",
             })
         }
         else if(pin=="" || pin==undefined || pin==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Pin is required",
                 stack: "Error: Please Provide Valid pin",
@@ -392,7 +398,7 @@ class ShopUserController{
                 
             }catch(err){
                 console.log(err)
-                return res.send({
+                return res.status(400).send({
                     code: 400,
                     message: "Please Provide Valid Mongodb Id",
                     stack: "Error: Please Provide Valid Mongodb Id",
@@ -418,11 +424,11 @@ class ShopUserController{
                     addresses:newArr
                 }
             });
-            return res.send("address Deleted Successfully");
+            return res.send({message:"address Deleted Successfully"});
             
         }catch(err){
             console.log(err)
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Please Provide Valid Mongodb Id",
                 stack: "Error: Please Provide Valid Mongodb Id",
@@ -434,14 +440,14 @@ class ShopUserController{
       const { old_password, new_password } = req.body;
 
         if(old_password=="" || old_password==undefined || old_password==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Old Password is required",
                 stack: "Error: Please Provide Password",
             })
         }
         else if(new_password=="" || new_password==undefined || new_password==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Password is required",
                 stack: "Error: Please Provide New Password",
@@ -460,10 +466,10 @@ class ShopUserController{
                             password:newHashPassword
                         }
                     })
-                    return res.send("Password Changed Successfully");
+                    return res.send({message:"Password Changed Successfully"});
                 }
                 else{
-                    return res.send({
+                    return res.status(400).send({
                         code: 400,
                         message: "Old Password Does Not Match",
                         stack: "Error: Please Enter Corrrect Old Password",
@@ -472,7 +478,7 @@ class ShopUserController{
 
             }catch(err){
                 console.log(err)
-                return res.send({
+                return res.status(400).send({
                     code: 400,
                     message: "Please Authenticate",
                     stack: "Error: Please Authenticate",
@@ -483,8 +489,12 @@ class ShopUserController{
 
       static deleteAccount = async(req,res)=>{
         try{
-            await shopUserModel.findByIdAndDelete(req.shopUser._id);
-            return res.send("Account Deleted successfully");
+            await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
+                $set:{
+                    deleted:true
+                }
+            });
+            return res.send({message:"Account Deleted successfully"});
         }catch(err){
             console.log(err);
             return res.send({
@@ -494,6 +504,17 @@ class ShopUserController{
             })
         }
         return res.send("Delete Account")
+      };
+
+      static getProductDetails = async(req,res)=>{
+        try{
+            let {productId} = req.params;
+            let product  = await productModel.findById(productId).select('-sellerId');
+            return res.send(product)
+        }
+        catch(err){
+            return res.status(400).send({message:"Error Occurred"})
+        }
       }
 }
 

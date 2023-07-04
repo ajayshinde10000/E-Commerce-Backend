@@ -22,8 +22,12 @@ class UserOrderController{
             };
         
             // Create the order
+            
             const newOrder = await orderModel.create(orderData);
-            console.log('Order created successfully:', newOrder);
+            let demo = {
+              order:newOrder
+            }
+            console.log('Order created successfully:', demo);
 
             // This Object to be send to User After Compliting order
             // {
@@ -56,9 +60,10 @@ class UserOrderController{
             //     "__v": 0
             // }
 
-            return res.send("Order Created Successfully")
+            return res.send(demo);
           } catch (error) {
             console.error('Error creating order:', error);
+            return res.status(400).send({message:"Error Occurred"});
           }
     };
 
@@ -102,13 +107,13 @@ class UserOrderController{
                 let nowYear = new Date().getFullYear();
 
                 if(parseInt(a[1])<nowYear){
-                   return res.send("Card Is Expired")
+                   return res.send({message:"Card Is Expired"})
                 }
                 else if(parseInt(a[1])==nowYear && parseInt(a[0])<nowDay){
-                    return res.send("Card Is Expired")
+                    return res.send({message:"Card Is Expired"})
                 }
                 else if(cardNumber!="4111111111111111"){
-                    return res.send("This card Is not Accepted For Payment")
+                    return res.send({message:"This card Is not Accepted For Payment"})
                 }
                 else{
                     let orderId = req.params.orderId;
@@ -131,9 +136,8 @@ class UserOrderController{
                         }
                         
                     }
-
+                    let transactionNo = this.randomString();   
                     for(let item of arr){
-                        let transactionNo = this.randomString();    
                         let obj ={
                             "address":order.address,
                             "items": item.items,
@@ -146,16 +150,24 @@ class UserOrderController{
                             "createdBy": order.createdBy,
                             "deleted": false,
                         }
-                        let doc = new sellerOrderModel(obj);
+                        console.log("Called")
+                        let doc = await new sellerOrderModel(obj);
                         await doc.save();
                     }
+
+                    await orderModel.findByIdAndUpdate(orderId,{
+                      $set:{
+                        paymentStatus:"Paid",
+                        status:"Confirmed"
+                      }
+                    })
                     return res.send({
                         "message": "Your order is successfully placed!!"
                     })
                 }
             }catch(err){
                 console.log(err);
-                return res.send("Error Occurred");
+                return res.send({message:"Error Occurred"});
             }
         }
         
@@ -301,7 +313,7 @@ class UserOrderController{
         static orderDetails = async(req,res)=>{
             try{
                 let {orderId} = req.params;
-                let order = await sellerOrderModel.findById(orderId);
+                let order = await orderModel.findById(orderId);
                 return res.send(order);
             }
             catch(err){
