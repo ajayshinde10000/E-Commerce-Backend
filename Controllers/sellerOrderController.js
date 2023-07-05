@@ -1,12 +1,11 @@
-import orderModel from "../Models/orders.js"
-import sellerOrderModel from "../Models/sellerOrders.js";
+import orderModel from "../Models/orders.js";
 class SellerOrderController{
     static getOrders = async(req,res)=>{
         try {
             let params = req.query;
             const { limit, page, sortBy, name } = req.query;
       
-            let countTotalResult = await sellerOrderModel.find({
+            let countTotalResult = await orderModel.find({
               "sellerId": req.seller._id,
             });
       
@@ -32,7 +31,7 @@ class SellerOrderController{
 
             if(name){
                 try{
-                    let product = await sellerOrderModel.find({name:name});
+                    let product = await orderModel.find({name:name});
                     return res.send({
                         results: product,
                         page: 1,
@@ -59,6 +58,8 @@ class SellerOrderController{
             }
       
             let countrole = 0;
+
+            u = u.filter((data)=>data.paymentStatus=="Paid")
       
             let obj = {
               results: u,
@@ -82,7 +83,7 @@ class SellerOrderController{
       
         static getUsersByQuery = async (filterParams, id) => {
           try {
-            let query = sellerOrderModel.find({ "sellerId": id });
+            let query = orderModel.find({ "sellerId": id });
             if (filterParams.name) {
               query = query.where("name").equals(filterParams.name);
             }
@@ -102,7 +103,7 @@ class SellerOrderController{
               page = parseInt(filterParams.page);
             }
       
-            const countQuery = sellerOrderModel.find({ "sellerId": id}).countDocuments();
+            const countQuery = orderModel.find({ "sellerId": id}).countDocuments();
             let totalUsers = await countQuery.exec();
       
           
@@ -125,10 +126,14 @@ class SellerOrderController{
           }
         };
 
+
+
         static orderDetails = async(req,res)=>{
             try{
                 let {orderId} = req.params;
-                let order = await sellerOrderModel.findById(orderId);
+                console.log(orderId,"From OrderId");
+                let order = await orderModel.findById(orderId);
+                console.log(order,"Order")
                 return res.send(order);
             }
             catch(err){
@@ -144,14 +149,29 @@ class SellerOrderController{
         static changeAction = async(req,res)=>{
             try{
                 let {action, orderId} = req.params;
-                if(action=="cancel" || action=="dispatch" || action=="deliver"){
-                    await sellerOrderModel.findByIdAndUpdate(orderId,{
+                if(action=="cancel"){
+                    await orderModel.findByIdAndUpdate(orderId,{
                         $set:{
-                            status:action
+                            status:"Cancelled",
+                            paymentStatus:"Refunded"
                         }
                     })
 
                     return res.send({message: `Order ${action} Successfully`})
+                }
+                else if(action == "dispatch"){
+                  await orderModel.findByIdAndUpdate(orderId,{
+                    $set:{
+                        status:"Dispatched"
+                    }
+                })
+                }
+                else if(action=="deliver"){
+                  await orderModel.findByIdAndUpdate(orderId,{
+                    $set:{
+                        status:"Delivered"
+                    }
+                })
                 }
                 else{
                     return res.send({

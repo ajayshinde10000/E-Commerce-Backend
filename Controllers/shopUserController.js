@@ -11,13 +11,10 @@ class ShopUserController{
 
 
     static getProducts = async(req,res)=>{
-
         try {
             let params = req.query;
             const { limit, page, sortBy, name } = req.query;
-      
             let countTotalResult = await productModel.find();
-      
             let resResult = countTotalResult.length;
             //console.log(countTotalResult,"Working");
             let u = await this.getUsersByQuery(req.query);

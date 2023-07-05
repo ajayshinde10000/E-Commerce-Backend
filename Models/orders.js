@@ -39,6 +39,10 @@ const orderSchema = new mongoose.Schema(
       type: String,
       required: true
     },
+    sellerId:{
+      type:String,
+      require:true
+    },
     deleted: {
       type: Boolean,
       default: false

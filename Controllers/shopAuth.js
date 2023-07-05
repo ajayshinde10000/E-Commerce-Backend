@@ -1,9 +1,6 @@
 import shopUserModel from "../Models/shopUser.js";
-
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
-
-
 
 class ShopAuthController {
   static register = async (req, res) => {
@@ -107,7 +104,15 @@ class ShopAuthController {
             if(shopUser){
                 const isMatch = await bcrypt.compare(password, shopUser.password);
                 let savedUser = await shopUserModel.findOne({email:email}).select("-password");
-                if(email==shopUser.email && isMatch){
+                
+                if(savedUser.deleted){
+                    return res.status(400).send({
+                        code: 400,
+                        message: "User Not Found Please Register First",
+                        stack: "Error: Please create Account",
+                    }) 
+                }
+                else if(email==shopUser.email && isMatch){
                     //Generating Token Here
                     const token = jwt.sign(
                         { sub: savedUser._id,type: 'access' },

@@ -1,8 +1,6 @@
 import sellerModel from "../Models/seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
-import e from "express";
-import emailVerificationModel from "../Models/emailVerification.js";
 import resetPasswordModel from "../Models/resetPassword.js";
 import emailModel from '../Models/Emails.js';
 
@@ -124,7 +122,14 @@ class AuthController {
         try{
           if(email!="" && password!=""){
             let seller = await sellerModel.findOne({email:email});
-            if(seller){
+            if(seller.deleted){
+              return res.status(400).send({
+                code: 400,
+                message: "User Not Found Please Register First",
+                stack: "Error: Please create Account",
+            }) 
+            }
+            else if(seller){
                 const isMatch = await bcrypt.compare(password, seller.password);
                 let savedSeller = await sellerModel.findOne({email:email});
                 if(email==seller.email && isMatch){

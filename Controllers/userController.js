@@ -46,10 +46,10 @@ class UserController {
           }
         }
         totalPages = Math.ceil(countrole/countLimit);
-
-    
         resResult = countrole;
       }
+
+      u = u.filter(data=>data.deleted==false);
 
       let obj = {
         results: u,
@@ -401,7 +401,11 @@ class UserController {
                 stack: "Error: User does not Exist With This Id",
             })
         }
-        await sellerModel.findByIdAndDelete(userId);
+        await sellerModel.findByIdAndUpdate(userId,{
+          $set:{
+            deleted:true
+          }
+        });
         return res.send({message:"User Deleted Successfully"});
         }catch(err){
             return res.status(400).send({
