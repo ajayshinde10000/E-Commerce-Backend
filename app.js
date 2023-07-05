@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 
-app.use('/uploads', express.static('Product-Images'));
+app.use('/product-images', express.static('Product-Images'));
 
 app.use('/auth',authRoutes);
 

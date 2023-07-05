@@ -38,6 +38,7 @@ router.patch('/images/:productId',upload.array('images'),productsController.upda
 router.patch('/:productId',productsController.updateProduct);
 router.delete('/:productId',productsController.deleteProduct);
 
+
 router.delete('/images/:filename', productsController.deleteProductImage);
 
 export default router;

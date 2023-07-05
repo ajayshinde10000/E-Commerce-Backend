@@ -82,7 +82,7 @@ class EmailController {
       const { email } = req.params;
       console.log(email, "From Params");
 
-      let savedEmails = await emailsModel.find({email:email});
+      let savedEmails = await emailsModel.find({email:email}).sort({createdAt: -1});
       let myStr = "";
 
       if(savedEmails.length == 0){
