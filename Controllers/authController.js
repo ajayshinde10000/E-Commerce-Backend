@@ -4,6 +4,9 @@ import bcrypt from 'bcrypt';
 import resetPasswordModel from "../Models/resetPassword.js";
 import emailModel from '../Models/Emails.js';
 
+import axios from 'axios';
+import querystring from 'querystring';
+
 import nodemailer from "nodemailer";
 
 const transporter = nodemailer.createTransport({
@@ -19,7 +22,7 @@ class AuthController {
     const { name, email, password, company } = req.body;
     const seller = await sellerModel.findOne({ email: email });
 
-    console.log(req.query,"From Params");
+    //console.log(req.query,"From Params");
 
     if (seller) {
       let obj = {
@@ -92,10 +95,10 @@ class AuthController {
                 let expiryDate = "";
                 jwt.verify(token,  process.env.JWT_SECRET_KEY, (err, decoded) => {
                     if (err) {
-                      console.error('Token verification failed:', err);
+                      //console.error('Token verification failed:', err);
                     } else {
                       expiryDate = new Date(decoded.exp * 1000);
-                      console.log('Token expiry date:', expiryDate);
+                      //console.log('Token expiry date:', expiryDate);
                     }
                 });
         
@@ -107,18 +110,52 @@ class AuthController {
                return res.send(obj);
         
              }catch(err){
-                console.log("Error",err);
+                //console.log("Error",err);
                 return res.send("Error Occurrred")
              }
         }
     }
   };
 
+static verifyRecaptcha = async (response) => {
+  const secretKey = '6LcDrP0mAAAAALRFSn3BceF6Vr1nckEoyNPG1o0C';
+  try {
+    console.log(response);
+    const url = `https://www.google.com/recaptcha/api/siteverify?response=${response}&secret=${secretKey}`;
+
+    const options = {
+      url: url,
+      method: 'POST',
+      headers: {
+        "Content-Type": "application/json"
+      },
+    };
+
+    const { data } = await axios(options);
+
+    console.log(data,"From Verify");
+    return data;
+  } catch (error) {
+    console.log('reCAPTCHA verification failed:', error.message);
+    return false;
+  }
+};
+
   static login = async(req,res)=>{
+
+    const {captcha} = req.body;
+    console.log(captcha);
+    const isRecaptchaValid = await this.verifyRecaptcha(captcha);
+
+    const {success} = isRecaptchaValid;
+    if(success){
+      console.log(success,"From Login");
+    }
+
     const {email,password} = req.body;
     let captchaStatus = req.query.captcha;
-    console.log(captchaStatus == "false");
-    if(captchaStatus=="false" || !captchaStatus){
+    //console.log(captchaStatus == "false");
+    if(success){
         try{
           if(email!="" && password!=""){
             let seller = await sellerModel.findOne({email:email});
@@ -142,10 +179,10 @@ class AuthController {
                     let expiryDate = "";
                     jwt.verify(token,  process.env.JWT_SECRET_KEY, (err, decoded) => {
                         if (err) {
-                          console.error('Token verification failed:', err);
+                          //console.error('Token verification failed:', err);
                         } else {
                           expiryDate = new Date(decoded.exp * 1000);
-                          console.log('Token expiry date:', expiryDate);
+                          //console.log('Token expiry date:', expiryDate);
                         }
                     });
             
@@ -190,7 +227,7 @@ class AuthController {
 
   static changePassword = async(req,res)=>{
     const {old_password,new_password} = req.body;
-    console.log(req.body,"From Change Password")
+    //console.log(req.body,"From Change Password")
     if(old_password=="" || old_password==undefined || old_password==null){
         return res.status(400).send({message:"Please Provide Old Password"});
     }
@@ -204,7 +241,7 @@ class AuthController {
         try{
             let salt = await bcrypt.genSalt(10);
             let newHashPassword = await bcrypt.hash(new_password,salt);
-            console.log(req.seller);
+            //console.log(req.seller);
 
             await sellerModel.findByIdAndUpdate(req.seller._id,{
                 $set:{
@@ -213,7 +250,7 @@ class AuthController {
             })
             return res.send({message:"Password Changed Successfully"});
         }catch(err){
-          console.log(err)
+          //console.log(err)
             return res.status(400).send({
                 code: 400,
                 message: "Unable To Change Password",
@@ -270,14 +307,14 @@ class AuthController {
 
 
 
-    let doc = new resetPasswordModel({
-      email:email,
-      description:`Dear user,
-                   To reset your password, click on this link: ${link}
-                   If you did not request any password resets, then ignore this email.`
-    }) 
+    // let doc = new resetPasswordModel({
+    //   email:email,
+    //   description:`Dear user,
+    //                To reset your password, click on this link: ${link}
+    //                If you did not request any password resets, then ignore this email.`
+    // }) 
 
-    await doc.save();
+    //await doc.save();
     await saveEmail.save();
     return res.send(saveEmail);
 
@@ -302,7 +339,7 @@ class AuthController {
   };
 
   static resetPassword = async(req,res)=>{
-    console.log(req.query,"Reset Password works");
+    //console.log(req.query,"Reset Password works");
     const { password} = req.body;
     const {token} = req.query;
     if(token=="" || token == undefined || token == null){
@@ -323,7 +360,7 @@ class AuthController {
         try{
             const {sub} = jwt.verify(token,process.env.JWT_SECRET_KEY);
             let seller = await sellerModel.findById(sub).select("-password");
-            console.log(seller);
+            //console.log(seller);
             let salt = await bcrypt.genSalt(10);
             let newHashPassword = await bcrypt.hash(password,salt);
 
@@ -332,11 +369,11 @@ class AuthController {
                     password:newHashPassword
                 }
             })
-            console.log("Sending Response Successfully")
+            //console.log("Sending Response Successfully")
             return res.status(201).send({message:"Password reset Successfull"});
 
         }catch(err){
-          console.log("Error Occured",err)
+          //console.log("Error Occured",err)
             return res.status(400).send({
                 code: 400,
                 message: "Provided Token Is not a valid token",
@@ -347,7 +384,7 @@ class AuthController {
   };
 
   static sendVerificationEmail = async(req,res)=>{
-    console.log(req.seller);
+    //console.log(req.seller);
     try{
         const token = await jwt.sign(
             { sub: req.seller._id,type: 'verifyEmail' },
@@ -404,7 +441,7 @@ class AuthController {
   return res.send({message:"Email Verification Link Will Be Sent On Your Email Please Check"});
 
     }catch(err){
-        console.log(err)
+        //console.log(err)
         return res.send({
             code: 400,
             message: "Unable To Send Email Please Provide Valid Email",
@@ -430,7 +467,7 @@ class AuthController {
                     "isEmailVerified":true
                 }
             })
-            console.log(seller);
+            //console.log(seller);
             res.send({message:"Email verified Successfully"})
         }catch(err){
             return res.send({
@@ -452,9 +489,55 @@ class AuthController {
             stack: "Error: Token not Found",
         })
     }
-   
-  }
+  };
 
+  static signInWithGoogle = async(req,res)=>{
+
+    const {captcha} = req.body;
+    const {email} = req.body;
+
+    //console.log(captcha);
+    const isRecaptchaValid = await this.verifyRecaptcha(captcha);
+
+    const {success} = isRecaptchaValid;
+    //console.log("Called");
+    if(success){
+      try{
+        let user = await sellerModel.findOne({email:email}).select("-password");
+        console.log(user);
+
+        const token = jwt.sign(
+          { sub: user,type: 'access' },
+            process.env.JWT_SECRET_KEY,
+          { expiresIn: "1d" }
+      );
+      let expiryDate = "";
+      jwt.verify(token,  process.env.JWT_SECRET_KEY, (err, decoded) => {
+          if (err) {
+            //console.error('Token verification failed:', err);
+          } else {
+            expiryDate = new Date(decoded.exp * 1000);
+            //console.log('Token expiry date:', expiryDate);
+          }
+      });
+
+      let obj = {
+          "user" : user,
+          "token":token,
+          "expires":expiryDate
+      }
+     return res.send(obj);
+
+      }catch(err){
+        return res.status(400).send({message:"Not Found"});
+      }
+    }
+    else{
+      res.status(400).send({message:"Captcha Verification Failed"})
+    }
+
+    //return res.send({message:"Sign In With Google Works"})
+  }
 }
 
 export default AuthController;

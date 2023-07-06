@@ -6,7 +6,7 @@ class UserController {
   static getUsers = async (req, res) => {
     try {
       let params = req.query;
-      console.log(params);
+      //console.log(params);
       const { limit, page, sortBy, role } = req.query;
 
       let countTotalResult = await sellerModel.find({
@@ -18,7 +18,7 @@ class UserController {
       let u = await this.getUsersByQuery(req.query, req.seller._org._id);
 
       if(u.length==undefined){
-        console.log(u.length)
+        //console.log(u.length)
         throw Error("Invalid Page Number");
       }
 
@@ -115,7 +115,7 @@ class UserController {
       // Calculate the total number of pages based on the filtered results
       const totalPages = Math.ceil(totalUsers / limit);
 
-      console.log(totalUsers,"From Limit");
+      //console.log(totalUsers,"From Limit");
 
       if (page > totalPages) {
        return new Error("Invalid Page Number");
@@ -125,7 +125,7 @@ class UserController {
       query = query.skip(skip);
 
       const users = await query.exec();
-      console.log(users,"From Users")
+      //console.log(users,"From Users")
       return users;
     } catch (error) {
       console.error("Error getting users:", error);
@@ -152,7 +152,7 @@ class UserController {
     }
     else{
         try{
-            console.log(req.seller)
+           //console.log(req.seller)
             let users = await sellerModel.updateMany({'_org._id':req.seller._org._id},{
                 "_org.name":name,
                 "_org.email":email,
@@ -171,13 +171,13 @@ class UserController {
 
 
   static createUser = async (req, res) => {
-    console.log(req.seller);
+    //console.log(req.seller);
 
     const { name, email, password, role } = req.body;
 
     const seller = await sellerModel.findOne({ email: email });
 
-    console.log(req.query, "From Params");
+    //console.log(req.query, "From Params");
 
     if (seller) {
       let obj = {
@@ -271,7 +271,7 @@ class UserController {
   static updateUserInfo = async(req,res)=>{
   
     let userId = req.params.userId;
-    console.log(userId);
+    //console.log(userId);
 
     const {email,password,name} = req.body;
     if(userId==null || userId==undefined || userId==""){
@@ -326,7 +326,7 @@ class UserController {
         });
 
         let updatedUser = await sellerModel.findById(userId).select("-password");
-        console.log(updatedUser,"From Node")
+        //console.log(updatedUser,"From Node")
         return res.send(updatedUser);
 
         }catch(err){
@@ -341,7 +341,7 @@ class UserController {
   }
 
   static updateUserRole = async(req,res)=>{
-    console.log(req.params.userId);
+    //console.log(req.params.userId);
     let userId = req.params.userId;
     const {role} = req.body;
 
@@ -388,7 +388,7 @@ class UserController {
   }
 
   static deleteUser = async(req,res)=>{
-    console.log(req.params.userId);
+    //console.log(req.params.userId);
     let userId = req.params.userId;
 
     if(userId){

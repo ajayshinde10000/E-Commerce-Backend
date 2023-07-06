@@ -1,9 +1,25 @@
 import shopUserModel from "../Models/shopUser.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
+import emailsModel from "../Models/Emails.js";
+import axios from "axios";
 
 class ShopAuthController {
   static register = async (req, res) => {
+
+    let response = req.body.captcha;
+
+    let captchaResult = await this.verifyRecaptcha(response);
+    const {success} = captchaResult;
+
+    if(!success){
+        return res.status(400).send({
+            code: 400,
+            message: "Re-Captcha Verification Failed",
+            stack: "Error: Please Provide Valid Captcha",
+        })
+    }
+
     const { name, email, password } = req.body;
     let {address} = req.body;
 
@@ -11,7 +27,7 @@ class ShopAuthController {
         address = [];
     }
     const shopUser = await shopUserModel.findOne({ email: email });
-    console.log(req.query,"From Params");
+    //console.log(req.query,"From Params");
 
     if (shopUser) {
       let obj = {
@@ -72,10 +88,10 @@ class ShopAuthController {
                 let expiryDate = "";
                 jwt.verify(token,  process.env.JWT_SECRET_KEY, (err, decoded) => {
                     if (err) {
-                      console.error('Token verification failed:', err);
+                     // console.error('Token verification failed:', err);
                     } else {
                       expiryDate = new Date(decoded.exp * 1000);
-                      console.log('Token expiry date:', expiryDate);
+                      //console.log('Token expiry date:', expiryDate);
                     }
                 });
         
@@ -87,18 +103,51 @@ class ShopAuthController {
                return res.send(obj);
         
              }catch(err){
-                console.log("Error",err);
+                //console.log("Error",err);
                 return res.send("Error Occurrred")
              }
         }
     }
   };
 
+  static verifyRecaptcha = async (response) => {
+    //console.log(response,"From Verify");
+    const secretKey = '6LcDrP0mAAAAALRFSn3BceF6Vr1nckEoyNPG1o0C';
+    try {
+      //console.log(response);
+      const url = `https://www.google.com/recaptcha/api/siteverify?response=${response}&secret=${secretKey}`;
+  
+      const options = {
+        url: url,
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json"
+        },
+      };
+  
+      const { data } = await axios(options);
+  
+      console.log(data,"From Verify");
+      return data;
+    } catch (error) {
+      console.log('reCAPTCHA verification failed:', error.message);
+      return false;
+    }
+  };
+
   static login = async(req,res)=>{
+    let response = req.body.captcha;
+    //console.log(req.body.captcha);
+
+    let captchaResult = await this.verifyRecaptcha(response);
+    const {success} = captchaResult;
+
+    console.log(success);
+    
     const {email,password} = req.body;
     let captchaStatus = req.query.captcha;
-    console.log(captchaStatus == "false");
-    if(true){
+
+    if(success){
         if(email!="" && password!=""){
             let shopUser = await shopUserModel.findOne({email:email});
             if(shopUser){
@@ -122,10 +171,10 @@ class ShopAuthController {
                     let expiryDate = "";
                     jwt.verify(token,  process.env.JWT_SECRET_KEY, (err, decoded) => {
                         if (err) {
-                          console.error('Token verification failed:', err);
+                          //console.error('Token verification failed:', err);
                         } else {
                           expiryDate = new Date(decoded.exp * 1000);
-                          console.log('Token expiry date:', expiryDate);
+                          //console.log('Token expiry date:', expiryDate);
                         }
                     });
             
@@ -157,7 +206,7 @@ class ShopAuthController {
         //res.send("Login Works")
     }
     else{
-       return res.send({
+       return res.status(400).send({
             code: 400,
             message: "Re-Captcha Verification Failed",
             stack: "Error: Please Provide Valid Captcha",
@@ -218,7 +267,7 @@ class ShopAuthController {
               };
               transporter.sendMail(mailOptions)
       .then((info) => {
-        console.log('Email sent: ' + info.response);
+       // console.log('Email sent: ' + info.response);
         return res.send(`Email Sent On Registered Mail Please Check: ${token}`);
       })
       .catch((error) => {
@@ -241,7 +290,7 @@ class ShopAuthController {
   };
 
   static resetPassword = async(req,res)=>{
-    console.log("Reset Password works");
+    //console.log("Reset Password works");
     const {token, password} = req.body;
     if(token=="" || token == undefined || token == null){
         return res.send({
@@ -261,7 +310,7 @@ class ShopAuthController {
         try{
             const {sub} = jwt.verify(token,process.env.JWT_SECRET_KEY);
             let seller = await sellerModel.findById(sub).select("-password");
-            console.log(seller);
+            //console.log(seller);
             let salt = await bcrypt.genSalt(10);
             let newHashPassword = await bcrypt.hash(password,salt);
 
@@ -284,9 +333,9 @@ class ShopAuthController {
   };
 
   static sendVerificationEmail = async(req,res)=>{
-    console.log(req.seller);
+    //console.log(req.seller);
     try{
-        const token = await jwt.sign(
+        const token = jwt.sign(
             { sub: req.seller._id,type: 'verifyEmail' },
               process.env.JWT_SECRET_KEY,
             { expiresIn: "15m" }
@@ -303,11 +352,11 @@ class ShopAuthController {
           };
           transporter.sendMail(mailOptions)
   .then((info) => {
-    console.log('Email sent: ' + info.response);
+    //console.log('Email sent: ' + info.response);
     return res.send(`Email Sent On Registered Mail Please Check: ${token}`);
   })
   .catch((error) => {
-    console.log("Email Error")
+    //console.log("Email Error")
     return res.send({
         code: 400,
         message: "Unable To Send Email Please Provide Valid Email",
@@ -316,7 +365,7 @@ class ShopAuthController {
   });
 
     }catch(err){
-        console.log("Main Error")
+        //console.log("Main Error")
         return res.send({
             code: 400,
             message: "Unable To Send Email Please Provide Valid Email",
@@ -342,7 +391,7 @@ class ShopAuthController {
                     "isEmailVerified":true
                 }
             })
-            console.log(seller);
+            //console.log(seller);
             res.send("Email verified Successfully")
         }catch(err){
             return res.send({
@@ -356,7 +405,7 @@ class ShopAuthController {
 
   static selfCall = async(req,res)=>{
     try{
-        console.log(req.shopUser);
+        //console.log(req.shopUser);
         return res.send(req.shopUser)
     }catch(err){
         return res.status(400).send({
@@ -365,8 +414,91 @@ class ShopAuthController {
             stack: "Error: Token not Found",
         })
     }
-   
+  };
+
+  static userSendForgotPasswordLink = async(req,res)=>{
+    try{
+        const {email} = req.body;
+        let user = await shopUserModel.find({email:email});
+        if(user){
+            console.log(user[0]._id)
+            const token = await jwt.sign(
+                { sub: user[0]._id,type: 'resetPassword' },
+                  process.env.JWT_SECRET_KEY,
+                { expiresIn: "15m" }
+            );
+            let link = `http://localhost:4200/shop/auth/reset-password?token=${token}`;
+            const mailOptions = {
+                from: "ajayshinde10000@gmail.com",
+                to: user.email,
+                subject: "Reset Password",
+                text:`Dear user,
+                      To reset your password, click on this link: ${link}
+                      If you did not request any password resets, then ignore this email.` ,
+              };
+
+            let saveEmail = new emailsModel({
+                email:email,
+                description:`Dear user,
+                To reset your password, click on this link: ${link}
+                If you did not request any password resets, then ignore this email.`,
+                link:link,
+                type:'reset'
+            })
+
+            await saveEmail.save();
+            return res.send({message:"Reset Password Email Sent On Your Email"})
+        }
+    }catch(err){
+        console.log(err);
+        return res.send({message:"Error Occurred"})
+    }
   }
+
+  static userResetPassword = async(req,res)=>{
+    const {password} = req.body;
+    const {token} = req.query;
+    if(token=="" || token == undefined || token == null){
+        return res.status(400).send({
+            code: 400,
+            message: "Token Not Found",
+            stack: "Error: Token Not Found",
+        })
+    }
+    else if(password=="" || password==undefined || password==null){
+        return res.status(400).send({
+            code: 400,
+            message: "Password Is Required",
+            stack: "Error: Password is not to be empty",
+        })
+    }
+    else{
+        try{
+            const {sub} = await jwt.verify(token,process.env.JWT_SECRET_KEY);
+            console.log(sub);
+            let user = await shopUserModel.findById(sub).select("-password");
+            let salt = await bcrypt.genSalt(10);
+            let newHashPassword = await bcrypt.hash(password,salt);
+
+            await shopUserModel.findByIdAndUpdate(sub,{
+                $set:{
+                    password:newHashPassword
+                }
+            })
+            return res.send({message:"Password reset Successfull"});
+
+        }catch(err){
+            console.log(err);
+            return res.status(400).send({
+                code: 400,
+                message: "Link expired Please Resend Email",
+                stack: "Error: Please Resend Email For Verification",
+            })
+        }
+        
+    }
+
+  } 
 
 }
 

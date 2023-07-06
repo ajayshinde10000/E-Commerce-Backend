@@ -11,7 +11,6 @@ class UserOrderController {
   static createOrder = async (req, res) => {
     try {
       const { address, items, deliveryFee, total } = req.body;
-
       const orderData = {
         address: address,
         items: items,
@@ -26,7 +25,7 @@ class UserOrderController {
       let demo = {
         order: newOrder,
       };
-      console.log("Order created successfully:", demo);
+      //console.log("Order created successfully:", demo);
 
       // This Object to be send to User After Compliting order
       // {
@@ -104,10 +103,10 @@ class UserOrderController {
     } else {
       try {
         let a = expiry.split("/");
-        console.log(a);
+        //console.log(a);
 
         let nowDay = new Date().getMonth() + 1;
-        console.log(nowDay, "From Now Day");
+       // console.log(nowDay, "From Now Day");
         let nowYear = new Date().getFullYear();
 
         if (parseInt(a[1]) < nowYear) {
@@ -140,7 +139,7 @@ class UserOrderController {
           for (let item of arr) {
             let countPrice = 0;
             for (let demo of item.items) {
-              console.log("Items Called");
+              //console.log("Items Called");
               countPrice += parseInt(demo.subTotal);
             }
 
@@ -161,17 +160,10 @@ class UserOrderController {
             await doc.save();
           }
 
-          // await orderModel.findByIdAndUpdate(orderId,{
-          //   $set:{
-          //     paymentStatus:"Paid",
-          //     status:"Confirmed"
-          //   }
-          // })
-
           await orderModel.findByIdAndDelete(orderId);
 
           return res.send({
-            message: "Your order is successfully placed!!",
+            message: "Your order is successfully placed!",
           });
         }
       } catch (err) {
@@ -207,7 +199,7 @@ class UserOrderController {
       let u = await this.getUsersByQuery(req.query, req.shopUser._id);
 
       if (u.length == undefined) {
-        console.log(u.length);
+        //console.log(u.length);
         throw Error("Invalid Page Number");
       }
 
@@ -308,7 +300,7 @@ class UserOrderController {
       query = query.skip(skip);
 
       const products = await query.exec();
-      console.log(products, "From Products");
+      //console.log(products, "From Products");
       return products;
     } catch (error) {
       console.error("Error getting Products:", error);

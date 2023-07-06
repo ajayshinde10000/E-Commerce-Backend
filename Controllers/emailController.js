@@ -28,11 +28,11 @@ class EmailController {
 
   static verifyEmail = async (req, res) => {
     const { email } = req.body;
-    console.log(email);
+    //console.log(email);
     try {
       // Check if the email exists in MongoDB
       const existingEmail = await sellerModel.find({ email: email });
-      console.log(existingEmail, "From Existing Email");
+      //console.log(existingEmail, "From Existing Email");
       // console.log(email,"From Existing email");
       if (existingEmail.length != 0) {
         req.reqEmail = email;
@@ -72,7 +72,7 @@ class EmailController {
         return res.redirect(`/emails`);
       }
     } catch (err) {
-      console.error(err);
+      //console.error(err);
       res.status(500).send("An error occurred during email verification");
     }
   };
@@ -80,7 +80,7 @@ class EmailController {
   static getEmails = async (req, res) => {
     try {
       const { email } = req.params;
-      console.log(email, "From Params");
+      //console.log(email, "From Params");
 
       let savedEmails = await emailsModel.find({email:email}).sort({createdAt: -1});
       let myStr = "";
@@ -218,7 +218,7 @@ class EmailController {
 
       let type = "Verify Email";
 
-      console.log(emailId);
+      //console.log(emailId);
 
       let emailDetails = await emailsModel.findById(emailId);
 

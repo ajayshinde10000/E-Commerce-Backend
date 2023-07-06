@@ -1,7 +1,6 @@
 import express from 'express'
 import multer from 'multer'
 import shopUserController from '../Controllers/shopUserController.js';
-
 import ShopAuthController from '../Controllers/shopAuth.js';
 import checkShopAuth from '../Middeleware/shopAuthMiddeleware.js'
 const router = express.Router();
@@ -28,6 +27,9 @@ router.get('/product/:productId',shopUserController.getProductDetails);
 router.get('/',shopUserController.getUser);
 router.post('/auth/register',ShopAuthController.register);
 router.post('/auth/login',ShopAuthController.login);
+
+router.post('/auth/forgot-password',ShopAuthController.userSendForgotPasswordLink);
+router.post('/auth/reset-password',ShopAuthController.userResetPassword);
 
 //private Apis
 router.get('/auth/self',ShopAuthController.selfCall);

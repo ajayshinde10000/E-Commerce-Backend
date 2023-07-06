@@ -14,7 +14,7 @@ class SellerOrderController{
             let u = await this.getUsersByQuery(req.query, req.seller._id);
       
             if(u.length==undefined){
-              console.log(u.length)
+              //console.log(u.length)
               throw Error("Invalid Page Number");
             }
       
@@ -58,7 +58,6 @@ class SellerOrderController{
             }
       
             let countrole = 0;
-
             u = u.filter((data)=>data.paymentStatus=="Paid")
       
             let obj = {
@@ -109,7 +108,7 @@ class SellerOrderController{
           
             // Calculate the total number of pages based on the filtered results
             const totalPages = Math.ceil(totalUsers / limit);
-            console.log(totalUsers,"From Limit");
+            //console.log(totalUsers,"From Limit");
       
             if (page > totalPages) {
              return new Error("Invalid Page Number");
@@ -119,10 +118,10 @@ class SellerOrderController{
             query = query.skip(skip);
       
             const products = await query.exec();
-            console.log(products,"From Products")
+            //console.log(products,"From Products")
             return products;
           } catch (error) {
-            console.error("Error getting Products:", error);
+            //console.error("Error getting Products:", error);
           }
         };
 
@@ -131,9 +130,9 @@ class SellerOrderController{
         static orderDetails = async(req,res)=>{
             try{
                 let {orderId} = req.params;
-                console.log(orderId,"From OrderId");
+                //.log(orderId,"From OrderId");
                 let order = await orderModel.findById(orderId);
-                console.log(order,"Order")
+                //console.log(order,"Order")
                 return res.send(order);
             }
             catch(err){

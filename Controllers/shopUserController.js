@@ -18,10 +18,10 @@ class ShopUserController{
             let resResult = countTotalResult.length;
             //console.log(countTotalResult,"Working");
             let u = await this.getUsersByQuery(req.query);
-            console.log(resResult,"From U")
+            //console.log(resResult,"From U")
       
             if(u.length==undefined){
-              console.log(u.length)
+              //console.log(u.length)
               throw Error("Invalid Page Number");
             }
       
@@ -76,7 +76,7 @@ class ShopUserController{
             // console.log(users);
             res.send(obj);
           } catch (err) {
-            console.log(err)
+            //console.log(err)
               return res.send({
                   results: [],
                   page: 0,
@@ -126,10 +126,10 @@ class ShopUserController{
             query = query.skip(skip);
       
             const products = await query.exec();
-            console.log(products,"From Products")
+            //console.log(products,"From Products")
             return products;
           } catch (error) {
-            console.error("Error getting Products:", error);
+            //console.error("Error getting Products:", error);
           }
         };
       
@@ -154,7 +154,7 @@ class ShopUserController{
         else{
             try{
 
-                console.log(req.shopUser);
+                //console.log(req.shopUser);
                 let shopUser = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                     $set:{
                         email:email,
@@ -176,10 +176,10 @@ class ShopUserController{
 
     static updateCustomerProfilePicture = async (req,res)=>{
         try{
-            console.log("Api Gets Hit")
+            //console.log("Api Gets Hit")
             res.set('Content-Type', 'image/jpeg');
             const profilePicture = req.file;
-            console.log(req.file)
+            //console.log(req.file)
             let user = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                 $set:{
                     picture:profilePicture.path
@@ -187,7 +187,7 @@ class ShopUserController{
             });
             return res.send({message:"Profile Picture Updated Successfully"});
         }catch(err){
-            console.log(err);
+            //console.log(err);
             return res.send({
                 code: 400,
                 message: "Please Authenticate",
@@ -205,7 +205,7 @@ class ShopUserController{
 
           const user = await shopUserModel.findById(userId);
 
-          console.log(user)
+          //console.log(user)
     
           if (!user) {
             return res.status(404).json({ error: 'Image not found' });
@@ -226,7 +226,7 @@ class ShopUserController{
         try {
           // Find the product that contains the requested image
           const user = await shopUserModel.findById(req.shopUser._id);
-          console.log(user)
+          //console.log(user)
     
           if (!user) {
             return res.status(404).json({ error: 'Image not found' });

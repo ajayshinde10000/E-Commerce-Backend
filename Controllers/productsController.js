@@ -19,7 +19,7 @@ class ProductsController {
       let u = await this.getUsersByQuery(req.query, req.seller._org._id);
 
       if (u.length == undefined) {
-        console.log(u.length);
+        //console.log(u.length);
         throw Error("Invalid Page Number");
       }
 
@@ -111,7 +111,7 @@ class ProductsController {
 
       // Calculate the total number of pages based on the filtered results
       const totalPages = Math.ceil(totalUsers / limit);
-      console.log(totalUsers, "From Limit");
+      //console.log(totalUsers, "From Limit");
 
       if (page > totalPages) {
         return new Error("Invalid Page Number");
@@ -121,10 +121,10 @@ class ProductsController {
       query = query.skip(skip);
 
       const products = await query.exec();
-      console.log(products, "From Products");
+      //console.log(products, "From Products");
       return products;
     } catch (error) {
-      console.error("Error getting Products:", error);
+     // console.error("Error getting Products:", error);
     }
   };
 
@@ -143,14 +143,14 @@ class ProductsController {
   };
 
   static createProduct = async (req, res) => {
-    console.log(req.body);
-    console.log(req.files);
-    console.log(req.seller);
+    // console.log(req.body);
+    // console.log(req.files);
+    // console.log(req.seller);
 
     try {
       // Extract the fields from the request body
       const { name, description, price } = req.body;
-      const _org = req.seller._org; // Assuming you have the _org value available in the authenticated user
+      const _org = req.seller._org;
 
       // Create a new product instance
       const product = new productsModel({
@@ -176,7 +176,6 @@ class ProductsController {
   };
 
   static updateProduct = async (req, res) => {
-
     const { name, description, price } = req.body;
     if (name == "" || name == undefined || name == null) {
       return res.send({
@@ -210,7 +209,7 @@ class ProductsController {
             price: price,
           },
         });
-        console.log(product, "From Product");
+        //console.log(product, "From Product");
         return res.send({ message: "Product Updated Successfully" });
       } catch (err) {
         return res.send({
@@ -267,7 +266,7 @@ class ProductsController {
   };
 
   static getProductImage = async (req, res) => {
-    console.log("APi Gets Hit");
+    //console.log("APi Gets Hit");
 
     const { filename } = req.params;
     try {
@@ -284,7 +283,7 @@ class ProductsController {
       // Read the image file
       fs.readFile(filePath, (err, data) => {
         if (err) {
-          console.error(err);
+          //console.error(err);
           return res.status(500).json({ error: "Failed to read image file" });
         }
 
@@ -293,7 +292,7 @@ class ProductsController {
         return res.send(data);
       });
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       return res.status(500).json({ error: "Failed to retrieve image" });
     }
   };
@@ -322,7 +321,7 @@ class ProductsController {
 
       res.json({ message: "Image deleted successfully" });
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       res.status(500).json({ error: "Failed to delete image" });
     }
   };
@@ -333,7 +332,7 @@ class ProductsController {
 
       const product = await productsModel.findById(productId);
       
-      console.log(req.body.delete);
+      //console.log(req.body.delete);
 
         if (req.body.delete) {
           req.body.delete.forEach((image) => {
@@ -357,7 +356,7 @@ class ProductsController {
       const updatedProduct = await product.save();
       res.json({ product: updatedProduct });
     } catch (error) {
-      console.error(error);
+      //console.error(error);
       res.status(500).json({ error: "Failed to update product images" });
     }
   };

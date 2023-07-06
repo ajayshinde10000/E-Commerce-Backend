@@ -3,6 +3,8 @@ dotenv.config();
 
 import bodyParser from 'body-parser';
 
+import fetch from 'isomorphic-fetch';
+
 import express from 'express';
 import cors from 'cors';
 import authRoutes from './Routes/authRoutes.js'
@@ -21,6 +23,8 @@ const DATABASE_URL = process.env.DATABASE_URL
 
 const app = express();
 app.use(cors());
+
+app.use(express.static('public'));
 
 //connection to Database
 connectDb(DATABASE_URL);
