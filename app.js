@@ -3,10 +3,9 @@ dotenv.config();
 
 import bodyParser from 'body-parser';
 
-import fetch from 'isomorphic-fetch';
-
 import express from 'express';
 import cors from 'cors';
+
 import authRoutes from './Routes/authRoutes.js'
 import userRoutes from './Routes/userRoutes.js'
 import productRoutes from './Routes/productsRoutes.js'

@@ -149,7 +149,7 @@ class ProductsController {
 
     try {
       // Extract the fields from the request body
-      const { name, description, price } = req.body;
+      const { name, description, price,category } = req.body;
       const _org = req.seller._org;
 
       // Create a new product instance
@@ -157,6 +157,7 @@ class ProductsController {
         name,
         description,
         price,
+        category,
         _org,
         images: req.files.map((file) => file.path),
         sellerId: req.seller._id,
@@ -360,6 +361,52 @@ class ProductsController {
       res.status(500).json({ error: "Failed to update product images" });
     }
   };
+
+  static addDiscount = async(req,res)=>{
+    try{
+      const {productId} = req.params;
+      const deal = req.body;
+      console.log(deal);
+      await productsModel.findByIdAndUpdate(productId,{
+      $set:{
+        deal:deal
+      }
+      })
+      return res.send({message:"Discount Works"})
+    }catch(err){
+      console.log(err);
+      res.status(400).send({message:"Error Occurred"});
+    }
+  };
+
+  static addDiscountByCategory = async(req,res)=>{
+    try{
+      console.log(req.seller);
+      const {ends,discount} = req.body;
+      const {categoryType} = req.params;
+
+      let products = await productsModel.find({"_org._id":req.seller._org._id});
+
+      products = products.filter(data=>data.category==categoryType)
+      console.log(products);
+     
+      for(let product of products){
+        let deal = {
+          price: Math.ceil((product.price)-(product.price*(discount/100))),
+          discount: `${discount}%`,
+          ends:ends
+        }
+        await productsModel.findByIdAndUpdate(product._id,{
+          $set:{
+            deal:deal
+          }
+        });
+      }
+      return res.send(products);
+    }catch(err){
+      return res.status(400).send({message:"Error Occurred"})
+    }
+  }
 }
 
 export default ProductsController;

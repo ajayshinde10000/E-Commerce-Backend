@@ -38,6 +38,8 @@ router.patch('/images/:productId',upload.array('images'),productsController.upda
 router.patch('/:productId',productsController.updateProduct);
 router.delete('/:productId',productsController.deleteProduct);
 
+router.patch('/deal/:productId',productsController.addDiscount);
+router.patch('/deal/category/:categoryType',productsController.addDiscountByCategory);
 
 router.delete('/images/:filename', productsController.deleteProductImage);
 

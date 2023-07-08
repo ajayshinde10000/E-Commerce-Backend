@@ -15,6 +15,23 @@ class ShopUserController{
             let params = req.query;
             const { limit, page, sortBy, name } = req.query;
             let countTotalResult = await productModel.find();
+
+            let current = new Date().toISOString();
+
+            for(let product of countTotalResult){
+                if(product.deal){
+                    if(current>product.deal.ends){
+                        await productModel.findByIdAndUpdate(product._id,{
+                            $unset:{
+                                deal:1
+                            }
+                        },{new:true})
+                    }
+                }
+            }
+
+            countTotalResult = await productModel.find();
+
             let resResult = countTotalResult.length;
             //console.log(countTotalResult,"Working");
             let u = await this.getUsersByQuery(req.query);
@@ -507,6 +524,20 @@ class ShopUserController{
         try{
             let {productId} = req.params;
             let product  = await productModel.findById(productId).select('-sellerId');
+
+            const current = new Date().toISOString();
+                if(product.deal){
+                    if(current>product.deal.ends){
+                        await productModel.findByIdAndUpdate(product._id,{
+                            $unset:{
+                                deal:1
+                            }
+                        },{new:true})
+                    }
+                }
+
+            product  = await productModel.findById(productId).select('-sellerId');
+
             return res.send(product)
         }
         catch(err){
