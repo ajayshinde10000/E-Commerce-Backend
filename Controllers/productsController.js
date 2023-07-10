@@ -132,8 +132,10 @@ class ProductsController {
     try {
       let productId = req.params.productId;
       let product = await productsModel.findById(productId).select("-_org");
+      console.log(product,"From Product")
       res.send(product);
     } catch (err) {
+      console.log("Erro Occur")
       return res.send({
         code: 400,
         message: "Please Provide Valid Product Id",
@@ -406,7 +408,60 @@ class ProductsController {
     }catch(err){
       return res.status(400).send({message:"Error Occurred"})
     }
+  };
+
+
+  static addDiscountToAllProducts = async(req,res)=>{
+    try{
+      console.log(req.seller,"From Seller side");
+      const {ends,discount} = req.body;
+     
+      let products = await productsModel.find({"_org._id":req.seller._org._id});
+      for(let product of products){
+        let deal = {
+          price: Math.ceil((product.price)-(product.price*(parseInt(discount)/100))),
+          discount: `${discount}%`,
+          ends:ends
+        }
+
+        await productsModel.findByIdAndUpdate(product._id,{
+          $set:{
+            deal:deal
+          }
+        })
+      }
+      return res.send({message:"Discount Added Successfully"});
+    }
+    catch(err){
+      console.log(err,"From All");
+      return res.status(400).send({message:"Error Occurred from All"})
+    }
+  };
+
+  static addDiscountToAllProductsOfIndividualSeller = async(req,res)=>{
+    try{
+      const {ends,discount} = req.body;
+      let products = await productsModel.find({"sellerId":req.seller._id});
+      for(let product of products){
+        let deal = {
+          price: Math.ceil((product.price)-(product.price*(parseInt(discount)/100))),
+          discount: `${discount}%`,
+          ends:ends
+        }
+        await productsModel.findByIdAndUpdate(product._id,{
+          $set:{
+            deal:deal
+          }
+        })
+      }
+      return res.send({message:"Discount Added Successfully"});
+    }
+    catch(err){
+      console.log(err,"From Individaul");
+      return res.status(400).send({message:"Error Occurred from All"})
+    }
   }
+
 }
 
 export default ProductsController;
