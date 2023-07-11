@@ -410,6 +410,22 @@ class ProductsController {
     }
   };
 
+  static addDiscountForTimeLimit = async(req,res)=>{
+    try{
+      const {productId} = req.params;
+      const deal = req.body;
+      console.log(deal);
+      await productsModel.findByIdAndUpdate(productId,{
+      $set:{
+        deal:deal
+      }
+      })
+      return res.send({message:"Discount Works"})
+    }catch(err){
+      console.log(err);
+      res.status(400).send({message:"Error Occurred"});
+    }
+  }
 
   static addDiscountToAllProducts = async(req,res)=>{
     try{

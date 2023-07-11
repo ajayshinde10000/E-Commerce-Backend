@@ -42,6 +42,7 @@ router.delete('/:productId',productsController.deleteProduct);
 router.patch('/deal/:productId',productsController.addDiscount);
 router.patch('/deal/category/:categoryType',productsController.addDiscountByCategory);
 router.put('/deal/discount',productsController.addDiscountToAllProducts);
+router.put('/deal/discount/time/:productId',productsController.addDiscountForTimeLimit);
 router.put('/deal/discount/individual',productsController.addDiscountToAllProductsOfIndividualSeller);
 
 router.delete('/images/:filename', productsController.deleteProductImage);
