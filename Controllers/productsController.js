@@ -338,7 +338,7 @@ class ProductsController {
       //console.log(req.body.delete);
 
         if (req.body.delete) {
-          req.body.delete.forEach((image) => {
+      req.body.delete.forEach((image) => {
       const index = product.images.indexOf(image);
       if (index !== -1) {
         fs.unlinkSync(path.join(`${process.cwd()}/${image}`));
@@ -352,12 +352,11 @@ class ProductsController {
       }
 
       const uploadedImages = req.files.map((file) => file.path);
-
       if (uploadedImages.length > 0) {
         product.images.push(...uploadedImages);
       }
       const updatedProduct = await product.save();
-      res.json({ product: updatedProduct });
+      return res.json({ product: updatedProduct,message:"Product Images Updated Successfully"});
     } catch (error) {
       //console.error(error);
       res.status(500).json({ error: "Failed to update product images" });
@@ -386,9 +385,7 @@ class ProductsController {
       console.log(req.seller);
       const {ends,discount} = req.body;
       const {categoryType} = req.params;
-
       let products = await productsModel.find({"_org._id":req.seller._org._id});
-
       products = products.filter(data=>data.category==categoryType)
       console.log(products);
      
@@ -429,9 +426,7 @@ class ProductsController {
 
   static addDiscountToAllProducts = async(req,res)=>{
     try{
-      console.log(req.seller,"From Seller side");
       const {ends,discount} = req.body;
-     
       let products = await productsModel.find({"_org._id":req.seller._org._id});
       for(let product of products){
         let deal = {
@@ -439,7 +434,6 @@ class ProductsController {
           discount: `${discount}%`,
           ends:ends
         }
-
         await productsModel.findByIdAndUpdate(product._id,{
           $set:{
             deal:deal
@@ -477,7 +471,6 @@ class ProductsController {
       return res.status(400).send({message:"Error Occurred from All"})
     }
   }
-
 }
 
 export default ProductsController;

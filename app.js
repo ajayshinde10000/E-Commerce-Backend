@@ -18,7 +18,7 @@ import emailRoutes from './Routes/emailRoutes.js';
 import connectDb from './Config/connectDB.js';
 
 const PORT = process.env.PORT;
-const DATABASE_URL = process.env.DATABASE_URL
+const DATABASE_URL = process.env.CLOUD_DATABASE_URL
 
 const app = express();
 app.use(cors());
@@ -51,5 +51,5 @@ app.use('/orders',sellerOrderRoutes);
 app.use('/emails',emailRoutes)
 
 app.listen(PORT,()=>{
-    console.log("App Listening on 3000 port")
+    console.log("App Listening on 3000 port");
 })

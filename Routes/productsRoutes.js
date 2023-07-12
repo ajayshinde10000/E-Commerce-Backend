@@ -19,7 +19,6 @@ const storage = multer.diskStorage({
   
 const upload = multer({ storage });
 
-
 router.use('/',checkAuth);
 router.use('/:productId',checkAuth);
 
@@ -28,7 +27,6 @@ router.use('/:productId',checkAuth);
 
 //Private Routes
 router.get('/',productsController.getProducts);
-
 router.get('/images/:filename',productsController.getProductImage);
 
 router.get('/:productId',productsController.getOneProduct);
