@@ -155,7 +155,6 @@ class SellerOrderController{
                             paymentStatus:"Refunded"
                         }
                     })
-
                     return res.send({message: `Order ${action} Successfully`})
                 }
                 else if(action == "dispatch"){
@@ -163,17 +162,22 @@ class SellerOrderController{
                     $set:{
                         status:"Dispatched"
                     }
-                })
+                });
+
+                return res.send({message: `Order ${action} Successfully`})
                 }
                 else if(action=="deliver"){
                   await orderModel.findByIdAndUpdate(orderId,{
                     $set:{
                         status:"Delivered"
                     }
-                })
+                });
+
+                return res.send({message: `Order ${action} Successfully`})
                 }
                 else{
-                    return res.send({
+                  console.log(err)
+                    return res.status(400).send({
                         code: 400,
                         message: "Please Provide Valid Action",
                         stack: "Error: Please Provide Valid Action",

@@ -524,7 +524,6 @@ class ShopUserController{
         try{
             let {productId} = req.params;
             let product  = await productModel.findById(productId).select('-sellerId');
-
             const current = new Date().toISOString();
                 if(product.deal){
                     if(current>product.deal.ends){
@@ -535,12 +534,11 @@ class ShopUserController{
                         },{new:true})
                     }
                 }
-
             product  = await productModel.findById(productId).select('-sellerId');
-
             return res.send(product)
         }
         catch(err){
+            console.log(err);
             return res.status(400).send({message:"Error Occurred"})
         }
       }

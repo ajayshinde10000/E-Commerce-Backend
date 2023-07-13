@@ -132,7 +132,20 @@ class ProductsController {
     try {
       let productId = req.params.productId;
       let product = await productsModel.findById(productId).select("-_org");
-      console.log(product,"From Product")
+
+      let current = new Date().toISOString();
+          if(product.deal){
+              if(current>product.deal.ends){
+                  await productsModel.findByIdAndUpdate(product._id,{
+                      $unset:{
+                          deal:1
+                      }
+                  },{new:true})
+              }
+
+             delete product.deal;
+      }
+
       res.send(product);
     } catch (err) {
       console.log("Erro Occur")

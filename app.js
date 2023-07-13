@@ -2,7 +2,6 @@ import dotenv from 'dotenv'
 dotenv.config();
 
 import bodyParser from 'body-parser';
-
 import express from 'express';
 import cors from 'cors';
 
@@ -13,7 +12,6 @@ import shopUserRoutes from './Routes/shopRoutes.js';
 import shoopUserOrderRoutes from './Routes/shopUserOrderRoutes.js'
 import sellerOrderRoutes from './Routes/sellerOrderRoutes.js'
 import emailRoutes from './Routes/emailRoutes.js';
-
 
 import connectDb from './Config/connectDB.js';
 
