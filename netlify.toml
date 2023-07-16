@@ -1,0 +1,9 @@
+[build]
+  command = "npm run build" # Replace with the command to build your Node.js API
+  functions = "dist" # Replace with the directory where your built API files are located
+
+[dev]
+  command = "npm run dev" # Replace with the command to start your development server
+
+[build.environment]
+  NODE_ENV = "production"
