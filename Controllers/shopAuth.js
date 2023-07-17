@@ -3,6 +3,10 @@ import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import emailsModel from "../Models/Emails.js";
 import axios from "axios";
+import { OAuth2Client } from 'google-auth-library';
+
+const CLIENT_ID = '574427248919-k87r9tjbn5qkl74fdqvisk0p159ed176.apps.googleusercontent.com'; // Replace with your actual client ID
+const client = new OAuth2Client(CLIENT_ID);
 
 class ShopAuthController {
   static register = async (req, res) => {
@@ -213,6 +217,70 @@ class ShopAuthController {
         })
     }
   };
+
+  static loginWithGoogle = async(req,res)=>{
+    console.log("Called")
+    const {captcha} = req.body;
+    const {email} = req.body;
+    const { token } = req.body;
+
+    //console.log(req.body,"From Body")
+
+    //console.log(captcha);
+    const isRecaptchaValid = await this.verifyRecaptcha(captcha);
+
+    const {success} = isRecaptchaValid;
+    if(success){
+      try{
+        const ticket = await client.verifyIdToken({
+          idToken: token,
+          audience: CLIENT_ID,
+        });
+    
+        const payload = ticket.getPayload();
+        console.log(payload,"From Payload..............................")
+
+        let user = await shopUserModel.findOne({email:email}).select("-password");
+
+        if(!user){
+          return res.status(400).send({
+            message:"Please Register First"
+          })
+        }
+
+        console.log(user);
+        const mytoken = jwt.sign(
+          { sub: user,type: 'access' },
+            process.env.JWT_SECRET_KEY,
+          { expiresIn: "1d" }
+      );
+      let expiryDate = "";
+      jwt.verify(mytoken,  process.env.JWT_SECRET_KEY, (err, decoded) => {
+          if (err) {
+            //console.error('Token verification failed:', err);
+          } else {
+            expiryDate = new Date(decoded.exp * 1000);
+            //console.log('Token expiry date:', expiryDate);
+          }
+      });
+
+      let obj = {
+          "user" : user,
+          "token":mytoken,
+          "expires":expiryDate
+      }
+     return res.send(obj);
+
+      }catch(err){
+        console.log(err);
+        return res.status(400).send({message:"Not Found"});
+      }
+    }
+    else{
+      res.status(400).send({message:"Captcha Verification Failed"})
+    }
+
+  }
 
   static changePassword = async(req,res)=>{
     const {old_password,new_password} = req.body;

@@ -1,13 +1,15 @@
 import sellerModel from "../Models/seller.js";
 import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
-import resetPasswordModel from "../Models/resetPassword.js";
 import emailModel from '../Models/Emails.js';
+import { OAuth2Client } from 'google-auth-library';
 
 import axios from 'axios';
-import querystring from 'querystring';
 
 import nodemailer from "nodemailer";
+
+const CLIENT_ID = '574427248919-k87r9tjbn5qkl74fdqvisk0p159ed176.apps.googleusercontent.com'; // Replace with your actual client ID
+const client = new OAuth2Client(CLIENT_ID);
 
 const transporter = nodemailer.createTransport({
   service: "Gmail",
@@ -120,7 +122,7 @@ class AuthController {
 static verifyRecaptcha = async (response) => {
   const secretKey = '6LcDrP0mAAAAALRFSn3BceF6Vr1nckEoyNPG1o0C';
   try {
-    console.log(response);
+    //console.log(response);
     const url = `https://www.google.com/recaptcha/api/siteverify?response=${response}&secret=${secretKey}`;
 
     const options = {
@@ -495,24 +497,40 @@ static verifyRecaptcha = async (response) => {
 
     const {captcha} = req.body;
     const {email} = req.body;
+    const { token } = req.body;
+
+    //console.log(req.body,"From Body")
 
     //console.log(captcha);
     const isRecaptchaValid = await this.verifyRecaptcha(captcha);
 
     const {success} = isRecaptchaValid;
-    //console.log("Called");
     if(success){
       try{
-        let user = await sellerModel.findOne({email:email}).select("-password");
-        console.log(user);
+        const ticket = await client.verifyIdToken({
+          idToken: token,
+          audience: CLIENT_ID,
+        });
+    
+        const payload = ticket.getPayload();
+        console.log(payload,"From Payload..............................")
 
-        const token = jwt.sign(
+        let user = await sellerModel.findOne({email:email}).select("-password");
+
+        if(!user){
+          return res.status(400).send({
+            message:"Please Register First"
+          })
+        }
+
+        console.log(user);
+        const mytoken = jwt.sign(
           { sub: user,type: 'access' },
             process.env.JWT_SECRET_KEY,
           { expiresIn: "1d" }
       );
       let expiryDate = "";
-      jwt.verify(token,  process.env.JWT_SECRET_KEY, (err, decoded) => {
+      jwt.verify(mytoken,  process.env.JWT_SECRET_KEY, (err, decoded) => {
           if (err) {
             //console.error('Token verification failed:', err);
           } else {
@@ -523,12 +541,13 @@ static verifyRecaptcha = async (response) => {
 
       let obj = {
           "user" : user,
-          "token":token,
+          "token":mytoken,
           "expires":expiryDate
       }
      return res.send(obj);
 
       }catch(err){
+        console.log(err);
         return res.status(400).send({message:"Not Found"});
       }
     }

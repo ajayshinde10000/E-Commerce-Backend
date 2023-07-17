@@ -273,7 +273,7 @@ class ShopUserController{
 
 
       static addNewAddress = async(req,res)=>{
-
+        console.log("Called");
         let { street, addressLine2 ,city ,state ,pin} = req.body;
         if(street=="" || street==undefined || street==null){
             return res.status(400).send({
