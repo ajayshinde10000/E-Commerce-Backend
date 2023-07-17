@@ -5,7 +5,8 @@
   "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "npm run build"
+    "build": "npm install --production",
+    "start": "node app.js"
   },
   "author": "Ajay Shinde",
   "license": "ISC",
