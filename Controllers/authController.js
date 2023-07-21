@@ -135,10 +135,9 @@ static verifyRecaptcha = async (response) => {
 
     const { data } = await axios(options);
 
-    console.log(data,"From Verify");
     return data;
   } catch (error) {
-    console.log('reCAPTCHA verification failed:', error.message);
+    //console.log('reCAPTCHA verification failed:', error.message);
     return false;
   }
 };
@@ -146,12 +145,11 @@ static verifyRecaptcha = async (response) => {
   static login = async(req,res)=>{
 
     const {captcha} = req.body;
-    console.log(captcha);
     const isRecaptchaValid = await this.verifyRecaptcha(captcha);
 
     const {success} = isRecaptchaValid;
     if(success){
-      console.log(success,"From Login");
+      //console.log(success,"From Login");
     }
 
     const {email,password} = req.body;
@@ -276,7 +274,7 @@ static verifyRecaptcha = async (response) => {
                 process.env.JWT_SECRET_KEY,
               { expiresIn: "15m" }
           );
-          let link = `http://localhost:4200/auth/reset-password?token=${token}`;
+          let link = `https://ajay-ecom.netlify.app/auth/reset-password?token=${token}`;
           const mailOptions = {
               from: "ajayshinde10000@gmail.com",
               to: seller.email,
@@ -394,7 +392,7 @@ static verifyRecaptcha = async (response) => {
             { expiresIn: "15m" }
         );
    
-        let link = `http://localhost:4200/auth/verify-email?token=${token}`;
+        let link = `https://ajay-ecom.netlify.app/auth/verify-email?token=${token}`;
 
         let saveEmail = new emailModel({
           email:req.seller.email,
@@ -513,8 +511,6 @@ static verifyRecaptcha = async (response) => {
         });
     
         const payload = ticket.getPayload();
-        console.log(payload,"From Payload..............................")
-
         let user = await sellerModel.findOne({email:email}).select("-password");
 
         if(!user){
@@ -523,7 +519,6 @@ static verifyRecaptcha = async (response) => {
           })
         }
 
-        console.log(user);
         const mytoken = jwt.sign(
           { sub: user,type: 'access' },
             process.env.JWT_SECRET_KEY,
@@ -547,7 +542,7 @@ static verifyRecaptcha = async (response) => {
      return res.send(obj);
 
       }catch(err){
-        console.log(err);
+        //console.log(err);
         return res.status(400).send({message:"Not Found"});
       }
     }

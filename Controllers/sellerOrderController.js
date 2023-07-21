@@ -176,7 +176,6 @@ class SellerOrderController{
                 return res.send({message: `Order ${action} Successfully`})
                 }
                 else{
-                  console.log(err)
                     return res.status(400).send({
                         code: 400,
                         message: "Please Provide Valid Action",

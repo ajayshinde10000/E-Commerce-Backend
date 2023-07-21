@@ -202,12 +202,12 @@ class ShopUserController{
                     picture:profilePicture.path
                 }
             });
-            return res.send({message:"Profile Picture Updated Successfully"});
+            return res.status(200).send({message:"Profile Picture Updated Successfully"});
         }catch(err){
             //console.log(err);
-            return res.send({
+            return res.status(400).send({
                 code: 400,
-                message: "Please Authenticate",
+                message: "Unabe To Add Profile Picture",
                 stack: "Error: Please Authenticate",
             })
         }
@@ -216,7 +216,6 @@ class ShopUserController{
 
     static getProfilePicture =  async (req, res) => {
         try {
-
         let {userId} = req.params;
           // Find the product that contains the requested image
 
@@ -234,7 +233,6 @@ class ShopUserController{
           res.sendFile(path.resolve(picturePath));
        
         } catch (error) {
-          console.error(error);
           res.status(500).json({ error: 'Failed to retrieve image' });
         }
       };
@@ -258,7 +256,7 @@ class ShopUserController{
          return res.send("Profile Image Deleted Successfully");
        
         } catch (error) {
-          console.error(error);
+          //console.error(error);
          return res.status(500).json({ error: 'Failed to retrieve image' });
         }
       };
@@ -273,7 +271,7 @@ class ShopUserController{
 
 
       static addNewAddress = async(req,res)=>{
-        console.log("Called");
+        //console.log("Called");
         let { street, addressLine2 ,city ,state ,pin} = req.body;
         if(street=="" || street==undefined || street==null){
             return res.status(400).send({
@@ -334,7 +332,7 @@ class ShopUserController{
                 return res.send(add);
                 
             }catch(err){
-                console.log(err)
+                //console.log(err)
                 return res.status(400).send({
                     code: 400,
                     message: "Unable To Add Address",
@@ -411,7 +409,7 @@ class ShopUserController{
                 return res.send("address Updated Successfully");
                 
             }catch(err){
-                console.log(err)
+                //console.log(err)
                 return res.status(400).send({
                     code: 400,
                     message: "Please Provide Valid Mongodb Id",
@@ -441,7 +439,7 @@ class ShopUserController{
             return res.send({message:"address Deleted Successfully"});
             
         }catch(err){
-            console.log(err)
+            //console.log(err)
             return res.status(400).send({
                 code: 400,
                 message: "Please Provide Valid Mongodb Id",
@@ -491,7 +489,7 @@ class ShopUserController{
                 }
 
             }catch(err){
-                console.log(err)
+                //console.log(err)
                 return res.status(400).send({
                     code: 400,
                     message: "Please Authenticate",
@@ -510,7 +508,7 @@ class ShopUserController{
             });
             return res.send({message:"Account Deleted successfully"});
         }catch(err){
-            console.log(err);
+            //console.log(err);
             return res.send({
                 code: 400,
                 message: "Please Authenticate",
@@ -538,7 +536,7 @@ class ShopUserController{
             return res.send(product)
         }
         catch(err){
-            console.log(err);
+            //console.log(err);
             return res.status(400).send({message:"Error Occurred"})
         }
       }

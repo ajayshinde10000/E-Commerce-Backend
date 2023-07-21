@@ -60,7 +60,7 @@ class UserOrderController {
 
       return res.send(demo);
     } catch (error) {
-      console.error("Error creating order:", error);
+      // console.error("Error creating order:", error);
       return res.status(400).send({ message: "Error Occurred" });
     }
   };
@@ -167,7 +167,6 @@ class UserOrderController {
           });
         }
       } catch (err) {
-        console.log(err);
         return res.send({ message: "Error Occurred" });
       }
     }
@@ -252,7 +251,6 @@ class UserOrderController {
       // console.log(users);
       res.send(obj);
     } catch (err) {
-      console.log(err);
       return res.send({
         results: [],
         page: 0,
@@ -290,7 +288,6 @@ class UserOrderController {
 
       // Calculate the total number of pages based on the filtered results
       const totalPages = Math.ceil(totalUsers / limit);
-      console.log(totalUsers, "From Limit");
 
       if (page > totalPages) {
         return new Error("Invalid Page Number");
@@ -303,7 +300,6 @@ class UserOrderController {
       //console.log(products, "From Products");
       return products;
     } catch (error) {
-      console.error("Error getting Products:", error);
     }
   };
 

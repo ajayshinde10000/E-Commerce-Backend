@@ -27,6 +27,7 @@ router.get('/product/:productId',shopUserController.getProductDetails);
 router.get('/',shopUserController.getUser);
 router.post('/auth/register',ShopAuthController.register);
 router.post('/auth/login',ShopAuthController.login);
+
 router.post('/auth/login/google',ShopAuthController.loginWithGoogle);
 
 router.post('/auth/forgot-password',ShopAuthController.userSendForgotPasswordLink);

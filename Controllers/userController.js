@@ -128,7 +128,7 @@ class UserController {
       //console.log(users,"From Users")
       return users;
     } catch (error) {
-      console.error("Error getting users:", error);
+      //console.error("Error getting users:", error);
     }
   };
 
@@ -246,10 +246,10 @@ class UserController {
           let expiryDate = "";
           jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decoded) => {
             if (err) {
-              console.error("Token verification failed:", err);
+             // console.error("Token verification failed:", err);
             } else {
               expiryDate = new Date(decoded.exp * 1000);
-              console.log("Token expiry date:", expiryDate);
+              //console.log("Token expiry date:", expiryDate);
             }
           });
 
@@ -260,7 +260,7 @@ class UserController {
           };
           return res.send(obj);
         } catch (err) {
-          console.log("Error", err);
+          //console.log("Error", err);
           return res.send({message:"Error Occurrred"});
         }
       }
@@ -330,7 +330,7 @@ class UserController {
         return res.send(updatedUser);
 
         }catch(err){
-          console.log(err);
+          // console.log(err);
             res.send({
                 code: 400,
                 message: 'Please Provide Valid UserId',

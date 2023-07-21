@@ -131,10 +131,8 @@ class ShopAuthController {
   
       const { data } = await axios(options);
   
-      console.log(data,"From Verify");
       return data;
     } catch (error) {
-      console.log('reCAPTCHA verification failed:', error.message);
       return false;
     }
   };
@@ -145,8 +143,6 @@ class ShopAuthController {
 
     let captchaResult = await this.verifyRecaptcha(response);
     const {success} = captchaResult;
-
-    console.log(success);
     
     const {email,password} = req.body;
     let captchaStatus = req.query.captcha;
@@ -219,7 +215,6 @@ class ShopAuthController {
   };
 
   static loginWithGoogle = async(req,res)=>{
-    console.log("Called")
     const {captcha} = req.body;
     const {email} = req.body;
     const { token } = req.body;
@@ -238,7 +233,6 @@ class ShopAuthController {
         });
     
         const payload = ticket.getPayload();
-        console.log(payload,"From Payload..............................")
 
         let user = await shopUserModel.findOne({email:email}).select("-password");
 
@@ -248,7 +242,6 @@ class ShopAuthController {
           })
         }
 
-        console.log(user);
         const mytoken = jwt.sign(
           { sub: user,type: 'access' },
             process.env.JWT_SECRET_KEY,
@@ -272,7 +265,6 @@ class ShopAuthController {
      return res.send(obj);
 
       }catch(err){
-        console.log(err);
         return res.status(400).send({message:"Not Found"});
       }
     }
@@ -409,7 +401,7 @@ class ShopAuthController {
             { expiresIn: "15m" }
         );
    
-        let link = `http://localhost:4200/auth/reset-password?token=${token}`;
+        let link = `https://ajay-ecom.netlify.app/auth/verify-email?token=${token}`;
         const mailOptions = {
             from: "ajayshinde10000@gmail.com",
             to: req.seller.email,
@@ -489,13 +481,12 @@ class ShopAuthController {
         const {email} = req.body;
         let user = await shopUserModel.find({email:email});
         if(user){
-            console.log(user[0]._id)
             const token = await jwt.sign(
                 { sub: user[0]._id,type: 'resetPassword' },
                   process.env.JWT_SECRET_KEY,
                 { expiresIn: "15m" }
             );
-            let link = `http://localhost:4200/shop/auth/reset-password?token=${token}`;
+            let link = `https://ajay-ecom.netlify.app/shop/auth/reset-password?token=${token}`;
             const mailOptions = {
                 from: "ajayshinde10000@gmail.com",
                 to: user.email,
@@ -518,7 +509,6 @@ class ShopAuthController {
             return res.send({message:"Reset Password Email Sent On Your Email"})
         }
     }catch(err){
-        console.log(err);
         return res.send({message:"Error Occurred"})
     }
   }
@@ -543,7 +533,6 @@ class ShopAuthController {
     else{
         try{
             const {sub} = await jwt.verify(token,process.env.JWT_SECRET_KEY);
-            console.log(sub);
             let user = await shopUserModel.findById(sub).select("-password");
             let salt = await bcrypt.genSalt(10);
             let newHashPassword = await bcrypt.hash(password,salt);
@@ -556,7 +545,6 @@ class ShopAuthController {
             return res.send({message:"Password reset Successfull"});
 
         }catch(err){
-            console.log(err);
             return res.status(400).send({
                 code: 400,
                 message: "Link expired Please Resend Email",
