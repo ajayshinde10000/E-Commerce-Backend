@@ -11,7 +11,6 @@ router.use('/role/:userId',checkAuth);
 
 //public Routes
 
-
 //Protected Routes
 router.get('/',userController.getUsers);
 router.patch('/org',userController.updateCompanyInfo);

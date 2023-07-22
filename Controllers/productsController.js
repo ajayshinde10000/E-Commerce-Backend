@@ -474,6 +474,10 @@ class ProductsController {
     catch(err){
       return res.status(400).send({message:"Error Occurred from All"})
     }
+  };
+
+  static searchProduct = async (req,res)=>{
+    res.send({message:"SuccessFul Search Api"});
   }
 }
 

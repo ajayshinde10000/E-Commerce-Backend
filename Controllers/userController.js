@@ -422,6 +422,10 @@ class UserController {
             stack: 'Please Provide valid UserId',
         })
     }
+  };
+
+  static searchProduct = async(req,res)=>{
+    res.send({message:"Works"})
   }
 
 }

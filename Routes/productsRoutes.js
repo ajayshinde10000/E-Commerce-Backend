@@ -24,7 +24,6 @@ router.use('/:productId',checkAuth);
 
 //Public Routes
 
-
 //Private Routes
 router.get('/',productsController.getProducts);
 router.get('/images/:filename',productsController.getProductImage);

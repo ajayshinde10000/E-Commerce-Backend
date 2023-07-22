@@ -12,6 +12,7 @@ import shopUserRoutes from './Routes/shopRoutes.js';
 import shoopUserOrderRoutes from './Routes/shopUserOrderRoutes.js'
 import sellerOrderRoutes from './Routes/sellerOrderRoutes.js'
 import emailRoutes from './Routes/emailRoutes.js';
+import searchRoutes from './Routes/SearchRoutes.js'
 
 import connectDb from './Config/connectDB.js';
 
@@ -37,6 +38,8 @@ app.use('/product-images', express.static('Product-Images'));
 app.use('/auth',authRoutes);
 
 app.use('/users',userRoutes);
+
+app.use('/products/search',searchRoutes);
 
 app.use('/products',productRoutes);
 
