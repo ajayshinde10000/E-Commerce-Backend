@@ -234,9 +234,6 @@ static verifyRecaptcha = async (response) => {
     else if(new_password=="" || new_password==undefined || new_password==null){
         return res.status(400).send({message:"Please Enter New Password"});
     }
-    else if(new_password != old_password){
-      return res.status(400).send({message:"Old Password And New Password Does not Match"});
-    }
     else{
         try{
             let salt = await bcrypt.genSalt(10);
@@ -483,7 +480,7 @@ static verifyRecaptcha = async (response) => {
     try{
         return res.send(req.seller)
     }catch(err){
-        return res.send({
+        return res.status(404).send({
             code: 400,
             message: "Please Provide Valid Token",
             stack: "Error: Token not Found",

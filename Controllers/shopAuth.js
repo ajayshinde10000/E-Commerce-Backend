@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import emailsModel from "../Models/Emails.js";
 import axios from "axios";
 import { OAuth2Client } from 'google-auth-library';
+import {mongoose} from 'mongoose'
 
 const CLIENT_ID = '574427248919-k87r9tjbn5qkl74fdqvisk0p159ed176.apps.googleusercontent.com'; // Replace with your actual client ID
 const client = new OAuth2Client(CLIENT_ID);
@@ -30,6 +31,13 @@ class ShopAuthController {
     if(!address){
         address = [];
     }
+    else{
+      var newId = new mongoose.Types.ObjectId();
+      address._id = newId
+    }
+
+
+
     const shopUser = await shopUserModel.findOne({ email: email });
     //console.log(req.query,"From Params");
 

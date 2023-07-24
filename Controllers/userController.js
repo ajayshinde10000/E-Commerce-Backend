@@ -275,28 +275,28 @@ class UserController {
 
     const {email,password,name} = req.body;
     if(userId==null || userId==undefined || userId==""){
-        return res.send({
+        return res.status(400).send({
                             code: 400,
                             message: 'UserId Should not Be Empty',
                             stack: "Error: UserId Should not Be Empty",
                         });
     }
     else if(email=="" || email==undefined || email==null){
-        return res.send({
+        return res.status(404).send({
             code: 400,
             message: '"Email" is not allowed to be empty',
             stack: "Error: Email Name is not allowed to be empty",
           })
     }
     else if(name=="" || name==undefined || name==null){
-        return res.send({
+        return res.status(404).send({
             code: 400,
             message: '"Name" is not allowed to be empty',
             stack: "Error: Name is not allowed to be empty",
           })
     }
     else if(password=="" || password==null || password==undefined){
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: '"Password" is not allowed to be empty',
             stack: "Error: Password is not allowed to be empty",
@@ -310,7 +310,7 @@ class UserController {
         let user = await sellerModel.findById(userId).select('-password');
     
         if(user==null || user==undefined){
-            res.send({
+            res.status(400).send({
                 code: 400,
                 message: 'Please Provide Valid UserId',
                 stack: "Error: User does not Exist With This Id",
@@ -346,7 +346,7 @@ class UserController {
     const {role} = req.body;
 
     if(userId==null || userId==undefined || userId==""){
-        return res.send({
+        return res.status(400).send({
                             code: 400,
                             message: 'UserId Should not Be Empty',
                             stack: "Error: UserId Should not Be Empty",
@@ -356,7 +356,7 @@ class UserController {
         try{
         let user = await sellerModel.findById(userId);
         if(user==null || user==undefined){
-            res.send({
+            res.status(400).send({
                 code: 400,
                 message: 'Please Provide Valid UserId',
                 stack: "Error: User does not Exist With This Id",
@@ -371,7 +371,7 @@ class UserController {
         return res.send({message:"User role Updated Successfully"});
 
         }catch(err){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: 'Please Provide Valid UserId',
                 stack: "Error: User does not Exist With This Id",
@@ -379,7 +379,7 @@ class UserController {
         }
     }
     else{
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: 'Role Must Be "user" or "password"',
             stack: 'Role Must Be "user" or "password"',
@@ -427,7 +427,6 @@ class UserController {
   static searchProduct = async(req,res)=>{
     res.send({message:"Works"})
   }
-
 }
 
 export default UserController;
