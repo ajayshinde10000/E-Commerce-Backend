@@ -9,7 +9,6 @@ class ShopUserController{
         res.send("Get User Works");
     }
 
-
     static getProducts = async(req,res)=>{
         try {
             let params = req.query;
