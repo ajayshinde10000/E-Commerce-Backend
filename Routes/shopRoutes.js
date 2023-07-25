@@ -28,8 +28,11 @@ router.get('/',shopUserController.getUser);
 router.post('/auth/register',ShopAuthController.register);
 router.post('/auth/login',ShopAuthController.login);
 
+router.post('/auth/login/google',ShopAuthController.loginWithGoogle);
+
 router.post('/auth/forgot-password',ShopAuthController.userSendForgotPasswordLink);
 router.post('/auth/reset-password',ShopAuthController.userResetPassword);
+
 
 //private Apis
 router.get('/auth/self',ShopAuthController.selfCall);
@@ -40,6 +43,7 @@ router.delete('/customers/profile-picture',shopUserController.removeProfilePictu
 router.get('/customers/address',shopUserController.getSavedAddresses);
 
 router.post('/customers/address',shopUserController.addNewAddress);
+
 router.put('/customers/address/:addressId',shopUserController.updateAddress);
 router.delete('/customers/address/:addressId',shopUserController.deleteAddress);
 router.post('/customers/auth/change-password',shopUserController.changePassword);

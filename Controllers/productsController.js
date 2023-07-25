@@ -148,7 +148,6 @@ class ProductsController {
 
       res.send(product);
     } catch (err) {
-      console.log("Erro Occur")
       return res.send({
         code: 400,
         message: "Please Provide Valid Product Id",
@@ -380,7 +379,6 @@ class ProductsController {
     try{
       const {productId} = req.params;
       const deal = req.body;
-      console.log(deal);
       await productsModel.findByIdAndUpdate(productId,{
       $set:{
         deal:deal
@@ -388,19 +386,16 @@ class ProductsController {
       })
       return res.send({message:"Discount Works"})
     }catch(err){
-      console.log(err);
       res.status(400).send({message:"Error Occurred"});
     }
   };
 
   static addDiscountByCategory = async(req,res)=>{
     try{
-      console.log(req.seller);
       const {ends,discount} = req.body;
       const {categoryType} = req.params;
       let products = await productsModel.find({"_org._id":req.seller._org._id});
       products = products.filter(data=>data.category==categoryType)
-      console.log(products);
      
       for(let product of products){
         let deal = {
@@ -424,7 +419,6 @@ class ProductsController {
     try{
       const {productId} = req.params;
       const deal = req.body;
-      console.log(deal);
       await productsModel.findByIdAndUpdate(productId,{
       $set:{
         deal:deal
@@ -432,7 +426,6 @@ class ProductsController {
       })
       return res.send({message:"Discount Works"})
     }catch(err){
-      console.log(err);
       res.status(400).send({message:"Error Occurred"});
     }
   }
@@ -456,7 +449,6 @@ class ProductsController {
       return res.send({message:"Discount Added Successfully"});
     }
     catch(err){
-      console.log(err,"From All");
       return res.status(400).send({message:"Error Occurred from All"})
     }
   };
@@ -480,9 +472,12 @@ class ProductsController {
       return res.send({message:"Discount Added Successfully"});
     }
     catch(err){
-      console.log(err,"From Individaul");
       return res.status(400).send({message:"Error Occurred from All"})
     }
+  };
+
+  static searchProduct = async (req,res)=>{
+    res.send({message:"SuccessFul Search Api"});
   }
 }
 

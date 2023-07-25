@@ -17,13 +17,12 @@ const storage = multer.diskStorage({
     }
   });
   
-const upload = multer({ storage });
+const upload = multer({ storage , limits:{fileSize:10000}});
 
 router.use('/',checkAuth);
 router.use('/:productId',checkAuth);
 
 //Public Routes
-
 
 //Private Routes
 router.get('/',productsController.getProducts);

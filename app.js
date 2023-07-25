@@ -12,6 +12,7 @@ import shopUserRoutes from './Routes/shopRoutes.js';
 import shoopUserOrderRoutes from './Routes/shopUserOrderRoutes.js'
 import sellerOrderRoutes from './Routes/sellerOrderRoutes.js'
 import emailRoutes from './Routes/emailRoutes.js';
+import searchRoutes from './Routes/SearchRoutes.js'
 
 import connectDb from './Config/connectDB.js';
 
@@ -38,6 +39,8 @@ app.use('/auth',authRoutes);
 
 app.use('/users',userRoutes);
 
+app.use('/products/search',searchRoutes);
+
 app.use('/products',productRoutes);
 
 app.use('/shop',shopUserRoutes);
@@ -47,6 +50,8 @@ app.use('/shop/orders',shoopUserOrderRoutes);
 app.use('/orders',sellerOrderRoutes);
 
 app.use('/emails',emailRoutes)
+
+//Hello Changes Here
 
 app.listen(PORT,()=>{
     console.log("App Listening on 3000 port");

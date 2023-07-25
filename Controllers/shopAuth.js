@@ -3,6 +3,11 @@ import jwt from "jsonwebtoken";
 import bcrypt from 'bcrypt';
 import emailsModel from "../Models/Emails.js";
 import axios from "axios";
+import { OAuth2Client } from 'google-auth-library';
+import {mongoose} from 'mongoose'
+
+const CLIENT_ID = '574427248919-k87r9tjbn5qkl74fdqvisk0p159ed176.apps.googleusercontent.com'; // Replace with your actual client ID
+const client = new OAuth2Client(CLIENT_ID);
 
 class ShopAuthController {
   static register = async (req, res) => {
@@ -26,6 +31,13 @@ class ShopAuthController {
     if(!address){
         address = [];
     }
+    else{
+      var newId = new mongoose.Types.ObjectId();
+      address._id = newId
+    }
+
+
+
     const shopUser = await shopUserModel.findOne({ email: email });
     //console.log(req.query,"From Params");
 
@@ -127,10 +139,8 @@ class ShopAuthController {
   
       const { data } = await axios(options);
   
-      console.log(data,"From Verify");
       return data;
     } catch (error) {
-      console.log('reCAPTCHA verification failed:', error.message);
       return false;
     }
   };
@@ -141,8 +151,6 @@ class ShopAuthController {
 
     let captchaResult = await this.verifyRecaptcha(response);
     const {success} = captchaResult;
-
-    console.log(success);
     
     const {email,password} = req.body;
     let captchaStatus = req.query.captcha;
@@ -213,6 +221,66 @@ class ShopAuthController {
         })
     }
   };
+
+  static loginWithGoogle = async(req,res)=>{
+    const {captcha} = req.body;
+    const {email} = req.body;
+    const { token } = req.body;
+
+    //console.log(req.body,"From Body")
+
+    //console.log(captcha);
+    const isRecaptchaValid = await this.verifyRecaptcha(captcha);
+
+    const {success} = isRecaptchaValid;
+    if(success){
+      try{
+        const ticket = await client.verifyIdToken({
+          idToken: token,
+          audience: CLIENT_ID,
+        });
+    
+        const payload = ticket.getPayload();
+
+        let user = await shopUserModel.findOne({email:email}).select("-password");
+
+        if(!user){
+          return res.status(400).send({
+            message:"Please Register First"
+          })
+        }
+
+        const mytoken = jwt.sign(
+          { sub: user,type: 'access' },
+            process.env.JWT_SECRET_KEY,
+          { expiresIn: "1d" }
+      );
+      let expiryDate = "";
+      jwt.verify(mytoken,  process.env.JWT_SECRET_KEY, (err, decoded) => {
+          if (err) {
+            //console.error('Token verification failed:', err);
+          } else {
+            expiryDate = new Date(decoded.exp * 1000);
+            //console.log('Token expiry date:', expiryDate);
+          }
+      });
+
+      let obj = {
+          "user" : user,
+          "token":mytoken,
+          "expires":expiryDate
+      }
+     return res.send(obj);
+
+      }catch(err){
+        return res.status(400).send({message:"Not Found"});
+      }
+    }
+    else{
+      res.status(400).send({message:"Captcha Verification Failed"})
+    }
+
+  }
 
   static changePassword = async(req,res)=>{
     const {old_password,new_password} = req.body;
@@ -341,7 +409,7 @@ class ShopAuthController {
             { expiresIn: "15m" }
         );
    
-        let link = `http://localhost:4200/auth/reset-password?token=${token}`;
+        let link = `https://ajay-ecom.netlify.app/auth/verify-email?token=${token}`;
         const mailOptions = {
             from: "ajayshinde10000@gmail.com",
             to: req.seller.email,
@@ -421,13 +489,12 @@ class ShopAuthController {
         const {email} = req.body;
         let user = await shopUserModel.find({email:email});
         if(user){
-            console.log(user[0]._id)
             const token = await jwt.sign(
                 { sub: user[0]._id,type: 'resetPassword' },
                   process.env.JWT_SECRET_KEY,
                 { expiresIn: "15m" }
             );
-            let link = `http://localhost:4200/shop/auth/reset-password?token=${token}`;
+            let link = `https://ajay-ecom.netlify.app/shop/auth/reset-password?token=${token}`;
             const mailOptions = {
                 from: "ajayshinde10000@gmail.com",
                 to: user.email,
@@ -450,7 +517,6 @@ class ShopAuthController {
             return res.send({message:"Reset Password Email Sent On Your Email"})
         }
     }catch(err){
-        console.log(err);
         return res.send({message:"Error Occurred"})
     }
   }
@@ -475,7 +541,6 @@ class ShopAuthController {
     else{
         try{
             const {sub} = await jwt.verify(token,process.env.JWT_SECRET_KEY);
-            console.log(sub);
             let user = await shopUserModel.findById(sub).select("-password");
             let salt = await bcrypt.genSalt(10);
             let newHashPassword = await bcrypt.hash(password,salt);
@@ -488,7 +553,6 @@ class ShopAuthController {
             return res.send({message:"Password reset Successfull"});
 
         }catch(err){
-            console.log(err);
             return res.status(400).send({
                 code: 400,
                 message: "Link expired Please Resend Email",

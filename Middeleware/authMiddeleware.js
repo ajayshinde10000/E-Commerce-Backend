@@ -20,7 +20,7 @@ const checkAuth = async(req,res,next)=>{
         }
     }
     else{
-        return res.send({
+        return res.status(400).send({
             code: 400,
             message: "Please Authenticate",
             stack: "Error: Please Authenticate",
