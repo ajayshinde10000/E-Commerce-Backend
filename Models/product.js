@@ -1,48 +1,48 @@
-import mongoose from 'mongoose'
+import mongoose from "mongoose";
 
 const productsSchema = new mongoose.Schema(
     {
         name: {
             type: String,
             required: true
-          },
-          description: {
+        },
+        description: {
             type: String,
             required: true
-          },
-          category: {
+        },
+        category: {
             type: String,
             required: true
-          },
-          price: {
+        },
+        price: {
             type: Number,
             required: true
-          },
-          images: {
+        },
+        images: {
             type: [String], // Array of image filenames
             required: true
         },
         _org: {
             _id: {
-              type: mongoose.Schema.Types.ObjectId,
-              required: true,
+                type: mongoose.Schema.Types.ObjectId,
+                required: true
             },
             name: {
-              type: String,
-              required: true,
+                type: String,
+                required: true
             },
             email: {
-              type: String,
-              required: true,
-            },
+                type: String,
+                required: true
+            }
         },
         deal:{},
         sellerId:{
-          type: String,
-          required: false,
+            type: String,
+            required: false
         }
-      }
-)
+    }
+);
 
 const productsModel = mongoose.model("products",productsSchema);
 

@@ -1,18 +1,17 @@
 import shopUserModel from "../Models/shopUser.js";
-import path from 'path';
-import mongoose from 'mongoose';
-import bcrypt from 'bcrypt'
-import productModel from '../Models/product.js'
+import path from "path";
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
+import productModel from "../Models/product.js";
 
 class ShopUserController{
     static getUser = async(req,res)=>{
         res.send("Get User Works");
-    }
+    };
 
     static getProducts = async(req,res)=>{
         try {
-            let params = req.query;
-            const { limit, page, sortBy, name } = req.query;
+            const { limit, page, name } = req.query;
             let countTotalResult = await productModel.find();
 
             let current = new Date().toISOString();
@@ -24,7 +23,7 @@ class ShopUserController{
                             $unset:{
                                 deal:1
                             }
-                        },{new:true})
+                        },{new:true});
                     }
                 }
             }
@@ -37,19 +36,19 @@ class ShopUserController{
             //console.log(resResult,"From U")
       
             if(u.length==undefined){
-              //console.log(u.length)
-              throw Error("Invalid Page Number");
+                //console.log(u.length)
+                throw Error("Invalid Page Number");
             }
       
             let countLimit = 10;
             let countPage = 1;
       
             if (limit) {
-              countLimit = limit;
+                countLimit = limit;
             }
       
             if (page) {
-              countPage = page;
+                countPage = page;
             }
 
             if(name){
@@ -60,8 +59,8 @@ class ShopUserController{
                         page: 1,
                         limit: 10,
                         totalPages: 1,
-                        totalResults: 1,
-                      })
+                        totalResults: 1
+                    });
                 }
                 catch(err){
                     return res.send({
@@ -69,60 +68,61 @@ class ShopUserController{
                         page: 1,
                         limit: 10,
                         totalPages: 1,
-                        totalResults: 1,
-                      })
+                        totalResults: 1
+                    });
                 }
                 
             }
       
             let totalPages = Math.ceil(resResult/ countLimit);
             if (totalPages == 0) {
-              totalPages = 1;
+                totalPages = 1;
             }
       
-            let countrole = 0;
       
             let obj = {
-              results: u,
-              page: countPage,
-              limit: countLimit,
-              totalPages: totalPages,
-              totalResults: resResult,
+                results: u,
+                page: countPage,
+                limit: countLimit,
+                totalPages: totalPages,
+                totalResults: resResult
             };
             // console.log(users);
             res.send(obj);
-          } catch (err) {
+        }
+        catch (err) {
             //console.log(err)
-              return res.send({
-                  results: [],
-                  page: 0,
-                  limit: 0,
-                  totalPages: 0,
-                  totalResults: 0,
-                })
-          }
-        };
+            return res.send({
+                results: [],
+                page: 0,
+                limit: 0,
+                totalPages: 0,
+                totalResults: 0
+            });
+        }
+    };
       
-        static getUsersByQuery = async (filterParams, id) => {
-          try {
+    // eslint-disable-next-line no-unused-vars
+    static getUsersByQuery = async (filterParams, id) => {
+        try {
             let query = productModel.find();
             if (filterParams.name) {
-              query = query.where("name").equals(filterParams.name);
+                query = query.where("name").equals(filterParams.name);
             }
       
             if (filterParams.sortBy) {
-              query = query.sort(filterParams.sortBy);
+                query = query.sort(filterParams.sortBy);
             }
       
             let limit = 10; // Default limit to 10 if not provided
             if (filterParams.limit) {
-              limit = parseInt(filterParams.limit);
+                limit = parseInt(filterParams.limit);
             }
             query = query.limit(limit);
       
             let page = 1; // Default page to 1 if not provided
             if (filterParams.page) {
-              page = parseInt(filterParams.page);
+                page = parseInt(filterParams.page);
             }
       
             const countQuery = productModel.find().countDocuments();
@@ -135,8 +135,8 @@ class ShopUserController{
             //console.log(totalPages,"From totalPages");
       
             if (page > totalPages) {
-             return new Error("Invalid Page Number");
-              //console.log("Invalid page number. No data available.");
+                return new Error("Invalid Page Number");
+                //console.log("Invalid page number. No data available.");
             }
             const skip = (page - 1) * limit;
             query = query.skip(skip);
@@ -144,48 +144,50 @@ class ShopUserController{
             const products = await query.exec();
             //console.log(products,"From Products")
             return products;
-          } catch (error) {
+        }
+        catch (error) {
             //console.error("Error getting Products:", error);
-          }
-        };
+        }
+    };
       
 
 
     static updateCustomerProfile = async(req,res)=>{
         const {name,email} = req.body;
         if(name=="" || name==undefined || name==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Name Is Requires",
-                stack: "Error: Please Provide Valid Name",
-              })
+                stack: "Error: Please Provide Valid Name"
+            });
         }
         else if(email=="" || email==undefined || email==null){
-            return res.send({
+            return res.status(400).send({
                 code: 400,
                 message: "Email Is Requires",
-                stack: "Error: Please Provide Valid email",
-              })
+                stack: "Error: Please Provide Valid email"
+            });
         }
         else{
             try{
 
                 //console.log(req.shopUser);
-                let shopUser = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
+                await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                     $set:{
                         email:email,
                         name:name
                     }
-                })
+                });
 
-                return res.send("Profile Updated Successfully")
+                return res.send({message:"Profile Updated Successfully"});
     
-            }catch(err){
-                return res.send({
+            }
+            catch(err){
+                return res.status(400).send({
                     code: 400,
                     message: "Please Authenticate",
-                    stack: "Error: Please Authenticate",
-                })
+                    stack: "Error: Please Authenticate"
+                });
             }
         }
     };
@@ -193,119 +195,123 @@ class ShopUserController{
     static updateCustomerProfilePicture = async (req,res)=>{
         try{
             //console.log("Api Gets Hit")
-            res.set('Content-Type', 'image/jpeg');
+            res.set("Content-Type", "image/jpeg");
             const profilePicture = req.file;
             //console.log(req.file)
-            let user = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
+            await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                 $set:{
                     picture:profilePicture.path
                 }
             });
             return res.status(200).send({message:"Profile Picture Updated Successfully"});
-        }catch(err){
+        }
+        catch(err){
             //console.log(err);
             return res.status(400).send({
                 code: 400,
                 message: "Unabe To Add Profile Picture",
-                stack: "Error: Please Authenticate",
-            })
+                stack: "Error: Please Authenticate"
+            });
         }
         //return res.send(profilePicture)
     };
 
     static getProfilePicture =  async (req, res) => {
         try {
-        let {userId} = req.params;
-          // Find the product that contains the requested image
+            let {userId} = req.params;
+            // Find the product that contains the requested image
 
-          const user = await shopUserModel.findById(userId);
+            const user = await shopUserModel.findById(userId);
 
-          //console.log(user)
+            //console.log(user)
     
-          if (!user) {
-            return res.status(404).json({ error: 'Image not found' });
-          }
+            if (!user) {
+                return res.status(404).json({ error: "Image not found" });
+            }
 
-          res.set('Content-Type', 'image/jpeg');
+            res.set("Content-Type", "image/jpeg");
 
-          const picturePath = user.picture;
-          res.sendFile(path.resolve(picturePath));
+            const picturePath = user.picture;
+            res.sendFile(path.resolve(picturePath));
        
-        } catch (error) {
-          res.status(500).json({ error: 'Failed to retrieve image' });
         }
-      };
+        catch (error) {
+            res.status(500).json({ error: "Failed to retrieve image" });
+        }
+    };
 
-      static removeProfilePicture =  async (req, res) => {
+    static removeProfilePicture =  async (req, res) => {
         try {
-          // Find the product that contains the requested image
-          const user = await shopUserModel.findById(req.shopUser._id);
-          //console.log(user)
+            // Find the product that contains the requested image
+            const user = await shopUserModel.findById(req.shopUser._id);
+            //console.log(user)
     
-          if (!user) {
-            return res.status(404).json({ error: 'Image not found' });
-          }
-
-         await shopUserModel.findByIdAndUpdate(user._id,{
-            $set:{
-                picture:"Profile-Picture-Images/28ad22b01fb87e34f1fdf4014e2a0e3c"
+            if (!user) {
+                return res.status(404).json({ error: "Image not found" });
             }
-         })
 
-         return res.send("Profile Image Deleted Successfully");
+            await shopUserModel.findByIdAndUpdate(user._id,{
+                $set:{
+                    picture:"Profile-Picture-Images/28ad22b01fb87e34f1fdf4014e2a0e3c"
+                }
+            });
+
+            return res.send("Profile Image Deleted Successfully");
        
-        } catch (error) {
-          //console.error(error);
-         return res.status(500).json({ error: 'Failed to retrieve image' });
         }
-      };
+        catch (error) {
+            //console.error(error);
+            return res.status(500).json({ error: "Failed to retrieve image" });
+        }
+    };
 
-      static getSavedAddresses = async(req,res)=>{
-            try{
-                return res.send(req.shopUser.addresses);
-            }catch(err){
-                return res.status(400).send({message:"Error Occurred"})
-            }
-      }
+    static getSavedAddresses = async(req,res)=>{
+        try{
+            return res.send(req.shopUser.addresses);
+        }
+        catch(err){
+            return res.status(400).send({message:"Error Occurred"});
+        }
+    };
 
 
-      static addNewAddress = async(req,res)=>{
+    static addNewAddress = async(req,res)=>{
         //console.log("Called");
         let { street, addressLine2 ,city ,state ,pin} = req.body;
         if(street=="" || street==undefined || street==null){
             return res.status(400).send({
                 code: 400,
                 message: "Street is required",
-                stack: "Error: Please Provide Street value",
-            })
+                stack: "Error: Please Provide Street value"
+            });
         }
         else if(addressLine2=="" || addressLine2==undefined || addressLine2==null){
             return res.status(400).send({
                 code: 400,
                 message: "Address Line2 is required",
-                stack: "Error: Please Provide Address Line2 value",
-            })
+                stack: "Error: Please Provide Address Line2 value"
+            });
         }
         else if(city=="" || city==undefined || city==null){
             return res.status(400).send({
                 code: 400,
                 message: "City is required",
-                stack: "Error: Please Provide City value",
-            })
+                stack: "Error: Please Provide City value"
+            });
         }
         else if(state=="" || state==undefined || state==null){
             return res.status(400).send({
                 code: 400,
                 message: "State is required",
-                stack: "Error: Please Provide State value",
-            })
+                stack: "Error: Please Provide State value"
+            });
         }
         else if(pin=="" || pin==undefined || pin==null){
             return res.status(400).send({
                 code: 400,
                 message: "Pin is required",
-                stack: "Error: Please Provide Valid pin",
-            })
+                stack: "Error: Please Provide Valid pin"
+            });
         }
         else{
             try{
@@ -319,7 +325,7 @@ class ShopUserController{
                     city: city, 
                     state: state, 
                     pin: pin
-                }
+                };
                 let user = await shopUserModel.findById(req.shopUser._id);
                 let add = user.addresses;
                 add.push(obj);
@@ -327,57 +333,58 @@ class ShopUserController{
                     $set:{
                         addresses:add
                     }
-                })
+                });
                 return res.send(add);
                 
-            }catch(err){
+            }
+            catch(err){
                 //console.log(err)
                 return res.status(400).send({
                     code: 400,
                     message: "Unable To Add Address",
-                    stack: "Error: Plaese check Token",
-                })
+                    stack: "Error: Plaese check Token"
+                });
             }
         }
 
-      }
+    };
 
-      static updateAddress = async(req,res)=>{
+    static updateAddress = async(req,res)=>{
         let { street, addressLine2 ,city ,state ,pin} = req.body;
         if(street=="" || street==undefined || street==null){
             return res.status(400).send({
                 code: 400,
                 message: "Street is required",
-                stack: "Error: Please Provide Street value",
-            })
+                stack: "Error: Please Provide Street value"
+            });
         }
         else if(addressLine2=="" || addressLine2==undefined || addressLine2==null){
             return res.status(400).send({
                 code: 400,
                 message: "Address Line2 is required",
-                stack: "Error: Please Provide Address Line2 value",
-            })
+                stack: "Error: Please Provide Address Line2 value"
+            });
         }
         else if(city=="" || city==undefined || city==null){
             return res.status(400).send({
                 code: 400,
                 message: "City is required",
-                stack: "Error: Please Provide City value",
-            })
+                stack: "Error: Please Provide City value"
+            });
         }
         else if(state=="" || state==undefined || state==null){
             return res.status(400).send({
                 code: 400,
                 message: "State is required",
-                stack: "Error: Please Provide State value",
-            })
+                stack: "Error: Please Provide State value"
+            });
         }
         else if(pin=="" || pin==undefined || pin==null){
             return res.status(400).send({
                 code: 400,
                 message: "Pin is required",
-                stack: "Error: Please Provide Valid pin",
-            })
+                stack: "Error: Please Provide Valid pin"
+            });
         }
         else{
             try{
@@ -392,34 +399,35 @@ class ShopUserController{
                             city: city, 
                             state: state, 
                             pin: pin
-                        }
-                        newArr.push(obj)
+                        };
+                        newArr.push(obj);
                     }
                     else{
                         newArr.push(item);
                     }
                 }
 
-                let user = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
+                await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                     $set:{
                         addresses:newArr
                     }
                 });
-                return res.send("address Updated Successfully");
+                return res.send({message:"address Updated Successfully"});
                 
-            }catch(err){
+            }
+            catch(err){
                 //console.log(err)
                 return res.status(400).send({
                     code: 400,
                     message: "Please Provide Valid Mongodb Id",
-                    stack: "Error: Please Provide Valid Mongodb Id",
-                })
+                    stack: "Error: Please Provide Valid Mongodb Id"
+                });
             }
         }
-      };
+    };
 
 
-      static deleteAddress = async(req,res)=>{
+    static deleteAddress = async(req,res)=>{
 
         try{
             let add = req.shopUser.addresses;
@@ -430,39 +438,40 @@ class ShopUserController{
                 }
             }
 
-            let user = await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
+            await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                 $set:{
                     addresses:newArr
                 }
             });
             return res.send({message:"address Deleted Successfully"});
             
-        }catch(err){
+        }
+        catch(err){
             //console.log(err)
             return res.status(400).send({
                 code: 400,
                 message: "Please Provide Valid Mongodb Id",
-                stack: "Error: Please Provide Valid Mongodb Id",
-            })
+                stack: "Error: Please Provide Valid Mongodb Id"
+            });
         }
-      }
+    };
 
-      static changePassword = async(req,res)=>{
-      const { old_password, new_password } = req.body;
+    static changePassword = async(req,res)=>{
+        const { old_password, new_password } = req.body;
 
         if(old_password=="" || old_password==undefined || old_password==null){
             return res.status(400).send({
                 code: 400,
                 message: "Old Password is required",
-                stack: "Error: Please Provide Password",
-            })
+                stack: "Error: Please Provide Password"
+            });
         }
         else if(new_password=="" || new_password==undefined || new_password==null){
             return res.status(400).send({
                 code: 400,
                 message: "Password is required",
-                stack: "Error: Please Provide New Password",
-            })
+                stack: "Error: Please Provide New Password"
+            });
         }
         else{
             try{
@@ -476,29 +485,30 @@ class ShopUserController{
                         $set:{
                             password:newHashPassword
                         }
-                    })
+                    });
                     return res.send({message:"Password Changed Successfully"});
                 }
                 else{
                     return res.status(400).send({
                         code: 400,
                         message: "Old Password Does Not Match",
-                        stack: "Error: Please Enter Corrrect Old Password",
-                    })
+                        stack: "Error: Please Enter Corrrect Old Password"
+                    });
                 }
 
-            }catch(err){
+            }
+            catch(err){
                 //console.log(err)
                 return res.status(400).send({
                     code: 400,
                     message: "Please Authenticate",
-                    stack: "Error: Please Authenticate",
-                })
+                    stack: "Error: Please Authenticate"
+                });
             }
         }
-      }
+    };
 
-      static deleteAccount = async(req,res)=>{
+    static deleteAccount = async(req,res)=>{
         try{
             await shopUserModel.findByIdAndUpdate(req.shopUser._id,{
                 $set:{
@@ -506,39 +516,39 @@ class ShopUserController{
                 }
             });
             return res.send({message:"Account Deleted successfully"});
-        }catch(err){
+        }
+        catch(err){
             //console.log(err);
             return res.send({
                 code: 400,
                 message: "Please Authenticate",
-                stack: "Error: Please Authenticate",
-            })
+                stack: "Error: Please Authenticate"
+            });
         }
-        return res.send("Delete Account")
-      };
+    };
 
-      static getProductDetails = async(req,res)=>{
+    static getProductDetails = async(req,res)=>{
         try{
             let {productId} = req.params;
-            let product  = await productModel.findById(productId).select('-sellerId');
+            let product  = await productModel.findById(productId).select("-sellerId");
             const current = new Date().toISOString();
-                if(product.deal){
-                    if(current>product.deal.ends){
-                        await productModel.findByIdAndUpdate(product._id,{
-                            $unset:{
-                                deal:1
-                            }
-                        },{new:true})
-                    }
+            if(product.deal){
+                if(current>product.deal.ends){
+                    await productModel.findByIdAndUpdate(product._id,{
+                        $unset:{
+                            deal:1
+                        }
+                    },{new:true});
                 }
-            product  = await productModel.findById(productId).select('-sellerId');
-            return res.send(product)
+            }
+            product  = await productModel.findById(productId).select("-sellerId");
+            return res.send(product);
         }
         catch(err){
             //console.log(err);
-            return res.status(400).send({message:"Error Occurred"})
+            return res.status(400).send({message:"Error Occurred"});
         }
-      }
+    };
 }
 
 export default ShopUserController;

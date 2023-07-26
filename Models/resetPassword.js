@@ -5,6 +5,6 @@ const reserPasswordSchema = new mongoose.Schema({
     description:String
 },{timestamps:true});
 
-const resetPasswordModel = mongoose.model('Reset-Password-Email',reserPasswordSchema);
+const resetPasswordModel = mongoose.model("Reset-Password-Email",reserPasswordSchema);
 
 export default resetPasswordModel;
