@@ -17,7 +17,8 @@ const storage = multer.diskStorage({
     }
 });
   
-const upload = multer({ storage , limits:{fileSize:1048576}});
+// limits:{fileSize:1048576} => We Can Set File Size Limit
+const upload = multer({ storage});
 
 router.use("/",checkAuth);
 router.use("/:productId",checkAuth);

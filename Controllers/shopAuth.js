@@ -438,7 +438,7 @@ class ShopAuthController {
                 // eslint-disable-next-line no-unused-vars
                 .catch((error) => {
                     //console.log("Email Error")
-                    return res.send({
+                    return res.status(400).send({
                         code: 400,
                         message: "Unable To Send Email Please Provide Valid Email",
                         stack: "Error: Unable to generate link. Sorry for the inconvennience"
@@ -477,7 +477,7 @@ class ShopAuthController {
                 res.send("Email verified Successfully");
             }
             catch(err){
-                return res.send({
+                return res.status(400).send({
                     code: 400,
                     message: "Please Provide Valid Token",
                     stack: "Error: Token not Found"
@@ -529,7 +529,6 @@ class ShopAuthController {
                     link:link,
                     type:"reset"
                 });
-
                 await saveEmail.save();
                 return res.send({message:"Reset Password Email Sent On Your Email"});
             }
