@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 
 const emailVerificationSchema = new mongoose.Schema(
-  {
-    email: String,
-    description: String,
-  },
-  { timestamps: true }
+    {
+        email: String,
+        description: String
+    },
+    { timestamps: true }
 );
 
 
-const emailVerificationModel = mongoose.model('Verify_Emails',emailVerificationSchema);
+const emailVerificationModel = mongoose.model("Verify_Emails",emailVerificationSchema);
 
 export default emailVerificationModel;

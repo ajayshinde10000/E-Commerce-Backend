@@ -7,7 +7,7 @@ import emailsModel from "../Models/Emails.js";
 const __dirname = path.resolve();
 
 class EmailController {
-  static enterEmail = async (req, res) => {
+    static enterEmail = async (req, res) => {
     // res.send(`
     //         <html>
     //         <head>
@@ -23,80 +23,82 @@ class EmailController {
     //         </html>
     // `);
 
-    return res.sendFile(path.join(__dirname, "./", "HTML_PAGES", "index.html"));
-  };
+        return res.sendFile(path.join(__dirname, "./", "HTML_PAGES", "index.html"));
+    };
 
-  static verifyEmail = async (req, res) => {
-    const { email } = req.body;
-    //console.log(email);
-    try {
-      // Check if the email exists in MongoDB
-      const existingEmail = await sellerModel.find({ email: email });
-      //console.log(existingEmail, "From Existing Email");
-      // console.log(email,"From Existing email");
-      if (existingEmail.length != 0) {
-        req.reqEmail = email;
-        return res.redirect(`/emails/${email}`);
-      } else {
-        // Render an error message on the current page
-        // return res.send(`
-        //   <html>
-        //     <head>
-        //       <title>Email Verification</title>
-        //     </head>
-        //     <body>
-        //       <h1>Email Verification Error</h1>
-        //       <p>The email address entered does not exist.</p>
-        //       <a href="/emails">Go back</a>
-        //     </body>
-        //   </html>
-        // `);
+    static verifyEmail = async (req, res) => {
+        const { email } = req.body;
+        //console.log(email);
+        try {
+            // Check if the email exists in MongoDB
+            const existingEmail = await sellerModel.find({ email: email });
+            //console.log(existingEmail, "From Existing Email");
+            // console.log(email,"From Existing email");
+            if (existingEmail.length != 0) {
+                req.reqEmail = email;
+                return res.redirect(`/emails/${email}`);
+            }
+            else {
+                // Render an error message on the current page
+                // return res.send(`
+                //   <html>
+                //     <head>
+                //       <title>Email Verification</title>
+                //     </head>
+                //     <body>
+                //       <h1>Email Verification Error</h1>
+                //       <p>The email address entered does not exist.</p>
+                //       <a href="/emails">Go back</a>
+                //     </body>
+                //   </html>
+                // `);
 
-        //     res.send(`
-        //         <html>
-        //         <head>
-        //         <title>Email Verification</title>
-        //         </head>
-        //         <body>
-        //         <h1>Enter your email address:</h1>
-        //             <form action="/emails/verify" method="post">
-        //             <input type="email" name="email" required>
-        //             <p>Please Enter Valid email</p>
-        //             <button type="submit">Verify</button>
-        //             </form>
-        //         </body>
-        //         </html>
-        // `);
+                //     res.send(`
+                //         <html>
+                //         <head>
+                //         <title>Email Verification</title>
+                //         </head>
+                //         <body>
+                //         <h1>Enter your email address:</h1>
+                //             <form action="/emails/verify" method="post">
+                //             <input type="email" name="email" required>
+                //             <p>Please Enter Valid email</p>
+                //             <button type="submit">Verify</button>
+                //             </form>
+                //         </body>
+                //         </html>
+                // `);
 
-        //res.sendFile(path.join(__dirname,'./', 'HTML_PAGES','emailErrorPage.html'));
-        return res.redirect(`/emails`);
-      }
-    } catch (err) {
-      //console.error(err);
-      res.status(500).send("An error occurred during email verification");
-    }
-  };
-
-  static getEmails = async (req, res) => {
-    try {
-      const { email } = req.params;
-      //console.log(email, "From Params");
-
-      let savedEmails = await emailsModel.find({email:email}).sort({createdAt: -1});
-      let myStr = "";
-
-      if(savedEmails.length == 0){
-        return res.redirect(`/emails`);
-      }
-
-      for(let e of savedEmails){
-
-        let attchType = "Email Verification";
-        if(e.type=="reset"){
-          attchType = "Reset Password"
+                //res.sendFile(path.join(__dirname,'./', 'HTML_PAGES','emailErrorPage.html'));
+                return res.redirect("/emails");
+            }
         }
+        catch (err) {
+            //console.error(err);
+            res.status(500).send("An error occurred during email verification");
+        }
+    };
 
-        myStr+= ` 
+    static getEmails = async (req, res) => {
+        try {
+            const { email } = req.params;
+            //console.log(email, "From Params");
+
+            let savedEmails = await emailsModel.find({email:email}).sort({createdAt: -1});
+            let myStr = "";
+
+            if(savedEmails.length == 0){
+                return res.redirect("/emails");
+            }
+
+            for(let e of savedEmails){
+
+                let attchType = "Email Verification";
+                if(e.type=="reset"){
+                    attchType = "Reset Password";
+                }
+
+                myStr+= ` 
         <a href="/emails/view/${e._id}">
           <div class="card mt-3">
                 <div class="card-body" style="background-color: #eeeeee;">
@@ -105,10 +107,10 @@ class EmailController {
                 </div>
           </div>
         </a>
-`
-      }
+`;
+            }
 
-      let myHtml = `
+            let myHtml = `
       <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -158,21 +160,22 @@ class EmailController {
     ></script>
   </body>
 </html>
-`
+`;
 
-      return res.send(myHtml);
+            return res.send(myHtml);
 
-    } catch (err) {
-      return res.send("Error Occurred");
-    }
-  };
+        }
+        catch (err) {
+            return res.send("Error Occurred");
+        }
+    };
 
-  static getVerifyEmailDetails = async (req, res) => {
-    try {
-      const { emailId } = req.params;
-      let email = await emailVerificationModel.findById(emailId);
+    static getVerifyEmailDetails = async (req, res) => {
+        try {
+            const { emailId } = req.params;
+            let email = await emailVerificationModel.findById(emailId);
 
-      let str = `
+            let str = `
         <div class="card">
   <h5 class="card-header">
     From: no-reply@ajayshinde.com <br>
@@ -188,7 +191,7 @@ class EmailController {
 </div>
 `;
 
-      let html = `<!doctype html>
+            let html = `<!doctype html>
         <html lang="en">
           <head>
             <meta charset="utf-8">
@@ -206,27 +209,28 @@ class EmailController {
           </body>
         </html>`;
 
-      res.send(html);
-    } catch (err) {
-      return res.send("Error Occured");
-    }
-  };
+            res.send(html);
+        }
+        catch (err) {
+            return res.send("Error Occured");
+        }
+    };
 
-  static getemailDetails = async (req, res) => {
-    try {
-      const { emailId } = req.params;
+    static getemailDetails = async (req, res) => {
+        try {
+            const { emailId } = req.params;
 
-      let type = "Verify Email";
+            let type = "Verify Email";
 
-      //console.log(emailId);
+            //console.log(emailId);
 
-      let emailDetails = await emailsModel.findById(emailId);
+            let emailDetails = await emailsModel.findById(emailId);
 
-      if (emailDetails.type == "reset") {
-        type = "Reset Password";
-      }
+            if (emailDetails.type == "reset") {
+                type = "Reset Password";
+            }
 
-      let html = `
+            let html = `
       <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -291,23 +295,26 @@ class EmailController {
 
 `;
 
-      return res.send(html);
-    } catch (err) {
-      return res.send({ message: "Error Occurred" });
-    }
-  };
+            return res.send(html);
+        }
+        catch (err) {
+            return res.send({ message: "Error Occurred" });
+        }
+    };
 
-  static getResetEmailDetails = async (req, res) => {
-    try {
-      try {
-        const { emailId } = req.params;
-        let email = await resetPasswordModel.findById(emailId);
-        res.send(email);
-      } catch (err) {
-        return res.send("Error Occured");
-      }
-    } catch (err) {}
-  };
+    static getResetEmailDetails = async (req, res) => {
+        try {
+            try {
+                const { emailId } = req.params;
+                let email = await resetPasswordModel.findById(emailId);
+                res.send(email);
+            }
+            catch (err) {
+                return res.send("Error Occured");
+            }
+        }
+        catch (err) { /* empty */ }
+    };
 
 }
 
