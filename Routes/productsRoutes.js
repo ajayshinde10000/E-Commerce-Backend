@@ -18,7 +18,7 @@ const storage = multer.diskStorage({
 });
   
 // limits:{fileSize:1048576} => We Can Set File Size Limit
-const upload = multer({ storage});
+const upload = multer({storage});
 
 router.use("/",checkAuth);
 router.use("/:productId",checkAuth);
@@ -42,7 +42,6 @@ router.patch("/deal/category/:categoryType",productsController.addDiscountByCate
 router.put("/deal/discount",productsController.addDiscountToAllProducts);
 router.put("/deal/discount/time/:productId",productsController.addDiscountForTimeLimit);
 router.put("/deal/discount/individual",productsController.addDiscountToAllProductsOfIndividualSeller);
-
 router.delete("/images/:filename", productsController.deleteProductImage);
 
 export default router;
