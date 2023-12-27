@@ -85,12 +85,7 @@ class AuthController {
                     await doc.save();
                     let savedSeller = await sellerModel.findOne({ email: email }).select("-users").select("-password");
                
-                    // await sellerModel.findByIdAndUpdate(savedSeller._id,{
-                    //     $set:{
-                    //         users:[savedSeller]
-                    //     }
-                    // })
-        
+               
                     //Generating Token Here
                     const token = jwt.sign(
                         { sub: savedSeller._id,type: "access" },
