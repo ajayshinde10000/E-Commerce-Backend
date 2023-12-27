@@ -1,33 +1,29 @@
 import jwt from "jsonwebtoken";
-import sellerModel from "../Models/seller.js";
+import sellerModel from "../models/seller.model.js";
+import asyncErrorHandler from "../controllers/asyncErrorHandler.js";
+import CustomError from "./customError.js";
+import organizationModel from "../models/organization.model.js";
 
-const checkAuth = async(req,res,next)=>{
-    //console.log(req.headers.authorization,"Middeleware Called");
+const checkAuth = asyncErrorHandler(async(req,res,next)=>{
     if(req.headers.authorization != undefined){
-        try{
-            let token = req.headers.authorization.split(" ")[1];
-            // eslint-disable-next-line no-undef
-            let result =jwt.verify(token, process.env.JWT_SECRET_KEY);
-            result = result.sub;
-            let seller = await sellerModel.findById(result).select("-password");
-            req.seller = seller;
-            next();
+        let token = req.headers.authorization.split(" ")[1];
+        // eslint-disable-next-line no-undef
+        let result =jwt.verify(token, process.env.JWT_SECRET_KEY);
+        result = result.sub;
+        let seller = await sellerModel.findById(result).select("-password");
+
+        if(!seller){
+            return next(new CustomError("Please authenticate",401));
         }
-        catch(err){
-            return res.status(400).send({
-                code: 400,
-                message: "Please Authenticate",
-                stack: "Error: Please Authenticate"
-            });
-        }
+
+        let org = await organizationModel.findById(seller._org).select("-createdAt").select("-updatedAt").select("-__v");
+        seller._org=org;
+        req.seller = seller;
+        next();
     }
     else{
-        return res.status(400).send({
-            code: 400,
-            message: "Please Authenticate",
-            stack: "Error: Please Authenticate"
-        });
+        next(new CustomError("Please authenticate",401));
     }
-};
+});
 
 export default checkAuth;
